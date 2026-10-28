@@ -1,0 +1,16 @@
+{
+  "name": "sec1_gr11_fe_src",
+  "version": "1.0.0",
+  "description": "creator-match frontend",
+  "license": "ISC",
+  "author": "Group11",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "nodemon": "^3.1.14"
+  }
+}
