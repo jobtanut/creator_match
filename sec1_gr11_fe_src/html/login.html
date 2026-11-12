@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">CreatorMatch</div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="search.html">Search Creator</a>
+            <a href="team.html">Team</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="login-box">
+        <h1>Admin Login</h1>
+
+        <form onsubmit="return login();">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+
+            <div class="login-button">
+                <button class="button" type="submit">Login</button>
+            </div>
+
+            <p id="loginMessage"></p>
+        </form>
+
+        <p class="small-text">Demo: admin / admin123</p>
+    </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">CreatorMatch</div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="search.html">Search Creator</a>
+            <a href="team.html">Team</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Search Creator</h1>
+
+    <section class="panel">
+        <form onsubmit="searchCreator(); return false;">
+            <label for="creatorName">Creator Name</label>
+            <input type="text" id="creatorName" placeholder="Enter creator name">
+
+            <label for="category">Category</label>
+            <select id="category">
+                <option>All</option>
+                <option>Food</option>
+                <option>Lifestyle</option>
+                <option>Fashion</option>
+                <option>Technology</option>
+            </select>
+
+            <p><b>Platform</b></p>
+            <div class="checkbox-group">
+                <label><input type="checkbox"> TikTok</label>
+                <label><input type="checkbox"> Instagram</label>
+                <label><input type="checkbox"> YouTube</label>
+            </div>
+
+            <button class="button" type="submit">Search</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Search Results</h2>
+
+        <div class="creator-list">
+            <article class="card creator-card" data-name="MintEats" data-category="Food">
+                <img src="https://placehold.co/300x300" alt="MintEats profile">
+                <h3>MintEats</h3>
+                <p>Food</p>
+                <p>820,000 followers</p>
+                <p class="small-text">TikTok / Instagram</p>
+                <a class="button" href="creator.html">View Detail</a>
+            </article>
+
+            <article class="card creator-card" data-name="Bebe" data-category="Lifestyle">
+                <img src="https://placehold.co/300x300" alt="Bebe profile">
+                <h3>Bebe</h3>
+                <p>Lifestyle</p>
+                <p>150,000 followers</p>
+                <p class="small-text">TikTok / Instagram</p>
+                <a class="button" href="creator.html">View Detail</a>
+            </article>
+
+            <article class="card creator-card" data-name="TechTom" data-category="Technology">
+                <img src="https://placehold.co/300x300" alt="TechTom profile">
+                <h3>TechTom</h3>
+                <p>Technology</p>
+                <p>320,000 followers</p>
+                <p class="small-text">YouTube / TikTok</p>
+                <a class="button" href="creator.html">View Detail</a>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer><p>CreatorMatch &copy; 2026</p></footer>
+<script src="script.js"></script>
+</body>
+</html>
