@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">CreatorMatch Admin</div>
+        <div>
+            <a href="admin.html">Creator Management</a>
+            <a href="index.html">Logout</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Creator Management</h1>
+
+    <section class="panel">
+        <h2>Add Creator</h2>
+
+        <form>
+            <label for="newName">Creator Name</label>
+            <input type="text" id="newName">
+
+            <label for="newCategory">Category</label>
+            <select id="newCategory">
+                <option>Food</option>
+                <option>Lifestyle</option>
+                <option>Fashion</option>
+                <option>Technology</option>
+            </select>
+
+            <label for="newFollowers">Followers</label>
+            <input type="number" id="newFollowers">
+
+            <button class="button" type="button">Add Creator</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Creator List</h2>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Creator</th>
+                <th>Category</th>
+                <th>Followers</th>
+                <th>Action</th>
+            </tr>
+
+            <tr>
+                <td>C001</td>
+                <td>MintEats</td>
+                <td>Food</td>
+                <td>820,000</td>
+                <td>
+                    <button class="action-button">Edit</button>
+                    <button class="action-button" onclick="deleteCreator(this)">Delete</button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>C002</td>
+                <td>Bebe</td>
+                <td>Lifestyle</td>
+                <td>150,000</td>
+                <td>
+                    <button class="action-button">Edit</button>
+                    <button class="action-button" onclick="deleteCreator(this)">Delete</button>
+                </td>
+            </tr>
+        </table>
+    </section>
+</main>
+
+<footer><p>CreatorMatch &copy; 2026</p></footer>
+<script src="script.js"></script>
+</body>
+</html>
