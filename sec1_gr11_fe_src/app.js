@@ -9,6 +9,7 @@ const port = process.env.PORT;
 const searchRouter = require('./router/searchRouter')
 const teamRouter = require('./router/teamRouter')
 const authRouter = require('./router/authRouter')
+const adminRouter = require('./router/adminRouter')
 
 app.use(express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname,"assets")));
@@ -16,7 +17,8 @@ app.use(express.static(path.join(__dirname,"assets")));
 app.use(router);
 app.use('/search', searchRouter);
 app.use('/team', teamRouter);
-app.use('/login', authRouter);
+app.use('/auth', authRouter);
+app.use('/admin',adminRouter);
 
 router.get('/', (req,res) => {
     res.sendFile(path.join(__dirname, "html", "home.html"))

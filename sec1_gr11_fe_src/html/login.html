@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>CreatorMatch - Login</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style/styles.css">
 </head>
 <body>
 <header>
     <nav>
-        <div class="logo">CreatorMatch</div>
+        <div class="logo">
+            <a href="/">CreatorMatch</a>
+        </div>
         <div>
-            <a href="index.html">Home</a>
-            <a href="search.html">Search Creator</a>
-            <a href="team.html">Team</a>
-            <a href="login.html">Login</a>
+            <a href="/">Home</a>
+            <a href="/search">Search Creator</a>
+            <a href="/team">Team</a>
+            <a href="/auth/login">Login</a>
         </div>
     </nav>
 </header>
@@ -36,7 +38,10 @@
             <p id="loginMessage"></p>
         </form>
 
-        <p class="small-text">Demo: admin / admin123</p>
+        <p class="small-text">
+            Don't have an account?
+            <a href="/auth/signup">Sign Up</a>
+        </p>
     </section>
 </main>
 
