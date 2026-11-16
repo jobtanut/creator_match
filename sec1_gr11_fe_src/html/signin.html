@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">CreatorMatch</div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="search.html">Search Creator</a>
+            <a href="team.html">Team</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="login-box">
+        <h1>Create Account</h1>
+
+        <form onsubmit="return register();">
+
+            <label for="firstname">First Name</label>
+            <input type="text" id="firstname" placeholder="Enter your first name" required>
+
+            <label for="lastname">Last Name</label>
+            <input type="text" id="lastname" placeholder="Enter your last name" required>
+
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+
+            <div class="login-button">
+                <button class="button" type="submit">Register</button>
+            </div>
+
+            <p id="registerMessage"></p>
+
+        </form>
+
+        <p class="small-text">
+            Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+    </section>
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
