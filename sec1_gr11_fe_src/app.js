@@ -1,15 +1,27 @@
-const express = require("express")
-const router = express.Router()
-const path = require("path")
-const app = express()
+const express = require("express");
+const router = express.Router();
+const path = require("path");
+const app = express();
+const dotenv = require('dotenv').config();
+const port = process.env.PORT;
 
-app.use('/')
-app.use(express.static(path.join(__dirname, "html")))
-app.use(express.static(path.join(__dirname,"assets")))
+// Router
+const searchRouter = require('./router/searchRouter')
+const teamRouter = require('./router/teamRouter')
+const authRouter = require('./router/authRouter')
+
+app.use(express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname,"assets")));
 
 app.use(router);
-app.use("/home", homeRouter)
+app.use('/search', searchRouter);
+app.use('/team', teamRouter);
+app.use('/login', authRouter);
 
 router.get('/', (req,res) => {
     res.sendFile(path.join(__dirname, "html", "home.html"))
-})
+});
+
+app.listen(port, () => {
+    console.log(`Frontend server listening on port: ${port}`)
+});
