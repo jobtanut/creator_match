@@ -1,6 +1,8 @@
 -- =====================================================================
 -- CreatorMatch database schema (MySQL 8.0.16+)
--- Generated from: CreatorMatch_data_dict.xlsx
+-- Accounts live in one table, User_account, with Role_ID:
+--   1 = Admin   (must be linked to a Team_Member)
+--   2 = User    (regular sign-up, no Team_Member link)
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS creatormatch
@@ -15,7 +17,9 @@ DROP TABLE IF EXISTS Management;
 DROP TABLE IF EXISTS Edition;
 DROP TABLE IF EXISTS Creator;
 DROP TABLE IF EXISTS Login_log;
-DROP TABLE IF EXISTS Admin_account;
+DROP TABLE IF EXISTS User_account;
+DROP TABLE IF EXISTS Admin_account;   -- old table name, removed
+DROP TABLE IF EXISTS Role;
 DROP TABLE IF EXISTS Team_Member;
 
 -- ---------------------------------------------------------------------
@@ -23,7 +27,7 @@ DROP TABLE IF EXISTS Team_Member;
 -- ---------------------------------------------------------------------
 CREATE TABLE Team_Member (
   TeamMemberID        VARCHAR(10)  NOT NULL COMMENT 'รหัสสมาชิกทีม (TXXXXXXXXX)',
-  email               VARCHAR(100) NOT NULL COMMENT 'อีเมลของสมาชิกทีม (ใช้ดึงไปสร้างบัญชีแอดมิน)',
+  email               VARCHAR(100) NOT NULL COMMENT 'อีเมลของสมาชิกทีม',
   t_first_name        VARCHAR(50)  NOT NULL COMMENT 'ชื่อจริงของสมาชิกทีม',
   t_last_name         VARCHAR(50)  NOT NULL COMMENT 'นามสกุลของสมาชิกทีม',
   position            VARCHAR(50)  NOT NULL COMMENT 'ตำแหน่งงานของสมาชิกทีม',
@@ -38,50 +42,72 @@ CREATE TABLE Team_Member (
   COMMENT='สมาชิกทีม';
 
 -- ---------------------------------------------------------------------
--- 2. Admin_account  (1:1 with Team_Member)
+-- 2. Role  (lookup: 1 = Admin, 2 = User)
 -- ---------------------------------------------------------------------
-CREATE TABLE Admin_account (
-  AdminID            VARCHAR(10)  NOT NULL COMMENT 'รหัสบัญชีแอดมิน (AXXXXXXXXX)',
-  username           VARCHAR(30)  NOT NULL COMMENT 'ชื่อผู้ใช้สำหรับเข้าสู่ระบบ',
-  password           VARCHAR(255) NOT NULL COMMENT 'รหัสผ่าน (จัดเก็บแบบ hashed)',
-  a_first_name       VARCHAR(50)  NOT NULL COMMENT 'ชื่อจริงของแอดมิน',
-  a_last_name        VARCHAR(50)  NOT NULL COMMENT 'นามสกุลของแอดมิน',
-  Position           VARCHAR(50)  NOT NULL COMMENT 'ตำแหน่งของแอดมินในทีม',
-  Permission         VARCHAR(100) NULL     COMMENT 'สิทธิ์การใช้งานของแอดมิน (derived)',
-  Admin_picture_link VARCHAR(255) NULL     COMMENT 'ลิงก์รูปโปรไฟล์ของแอดมิน',
-  Bio                VARCHAR(255) NULL     COMMENT 'ประวัติโดยย่อของแอดมิน',
-  TeamMemberID       VARCHAR(10)  NOT NULL COMMENT 'รหัสสมาชิกทีมต้นทางที่ใช้สร้างบัญชีแอดมินนี้ (1:1)',
-  PRIMARY KEY (AdminID),
-  UNIQUE KEY uq_admin_username (username),
-  UNIQUE KEY uq_admin_team_member (TeamMemberID),  -- enforces the 1:1 relationship
-  CONSTRAINT fk_admin_team_member
-    FOREIGN KEY (TeamMemberID) REFERENCES Team_Member (TeamMemberID)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT chk_admin_password CHECK (CHAR_LENGTH(password) >= 8)
+CREATE TABLE Role (
+  Role_ID   INT         NOT NULL COMMENT 'รหัสบทบาท (1 = Admin, 2 = User)',
+  Role_Name VARCHAR(20) NOT NULL COMMENT 'ชื่อบทบาท',
+  PRIMARY KEY (Role_ID),
+  UNIQUE KEY uq_role_name (Role_Name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='บัญชีแอดมิน';
+  COMMENT='บทบาทของบัญชีผู้ใช้';
+
+INSERT INTO Role (Role_ID, Role_Name) VALUES
+(1, 'Admin'),
+(2, 'User');
 
 -- ---------------------------------------------------------------------
--- 3. Login_log
+-- 3. User_account  (replaces Admin_account; admins and regular users)
+-- ---------------------------------------------------------------------
+CREATE TABLE User_account (
+  UserID            VARCHAR(10)  NOT NULL COMMENT 'รหัสบัญชีผู้ใช้ (UXXXXXXXXX)',
+  username          VARCHAR(30)  NOT NULL COMMENT 'ชื่อผู้ใช้สำหรับเข้าสู่ระบบ',
+  email             VARCHAR(100) NOT NULL COMMENT 'อีเมลของผู้ใช้',
+  password          VARCHAR(255) NOT NULL COMMENT 'รหัสผ่าน',
+  first_name        VARCHAR(50)  NOT NULL COMMENT 'ชื่อจริง',
+  last_name         VARCHAR(50)  NOT NULL COMMENT 'นามสกุล',
+  Position          VARCHAR(50)  NULL     COMMENT 'ตำแหน่งในทีม (เฉพาะแอดมิน)',
+  User_picture_link VARCHAR(255) NULL     COMMENT 'ลิงก์รูปโปรไฟล์',
+  Bio               VARCHAR(255) NULL     COMMENT 'ประวัติโดยย่อ',
+  Role_ID           INT          NOT NULL DEFAULT 2 COMMENT 'บทบาท (1 = Admin, 2 = User)',
+  TeamMemberID      VARCHAR(10)  NULL     COMMENT 'รหัสสมาชิกทีม (เฉพาะแอดมิน, 1:1)',
+  created_at        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'วันที่สร้างบัญชี',
+  PRIMARY KEY (UserID),
+  UNIQUE KEY uq_user_username (username),
+  UNIQUE KEY uq_user_email (email),
+  UNIQUE KEY uq_user_team_member (TeamMemberID),  -- one account per team member (NULLs allowed)
+  KEY idx_user_role (Role_ID),
+  CONSTRAINT fk_user_role
+    FOREIGN KEY (Role_ID) REFERENCES Role (Role_ID)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_user_team_member
+    FOREIGN KEY (TeamMemberID) REFERENCES Team_Member (TeamMemberID)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT chk_user_password CHECK (CHAR_LENGTH(password) >= 8)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='บัญชีผู้ใช้ (แอดมินและผู้ใช้ทั่วไป)';
+
+-- ---------------------------------------------------------------------
+-- 4. Login_log
 -- ---------------------------------------------------------------------
 CREATE TABLE Login_log (
   Login_log_ID    VARCHAR(20) NOT NULL COMMENT 'รหัสบันทึกการเข้าสู่ระบบ (LXXXXXXXXX)',
   login_datetime  DATETIME    NOT NULL COMMENT 'วันและเวลาที่เข้าสู่ระบบ',
   logout_datetime DATETIME    NULL     COMMENT 'วันและเวลาที่ออกจากระบบ',
   login_status    VARCHAR(20) NOT NULL COMMENT 'สถานะการเข้าสู่ระบบ (Success/Failed)',
-  AdminID         VARCHAR(10) NOT NULL COMMENT 'รหัสบัญชีแอดมินที่เข้าสู่ระบบ',
+  UserID          VARCHAR(10) NOT NULL COMMENT 'รหัสบัญชีผู้ใช้ที่เข้าสู่ระบบ',
   PRIMARY KEY (Login_log_ID),
-  KEY idx_login_log_admin (AdminID),
-  CONSTRAINT fk_login_log_admin
-    FOREIGN KEY (AdminID) REFERENCES Admin_account (AdminID)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
+  KEY idx_login_log_user (UserID),
+  CONSTRAINT fk_login_log_user
+    FOREIGN KEY (UserID) REFERENCES User_account (UserID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT chk_login_status CHECK (login_status IN ('Success', 'Failed')),
   CONSTRAINT chk_logout_after_login CHECK (logout_datetime IS NULL OR logout_datetime >= login_datetime)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='บันทึกการเข้าสู่ระบบ';
 
 -- ---------------------------------------------------------------------
--- 4. Creator
+-- 5. Creator
 -- ---------------------------------------------------------------------
 CREATE TABLE Creator (
   creatorID            VARCHAR(10)  NOT NULL COMMENT 'รหัสครีเอเตอร์ (CXXXXXXXXX)',
@@ -98,10 +124,10 @@ CREATE TABLE Creator (
   COMMENT='ครีเอเตอร์';
 
 -- ---------------------------------------------------------------------
--- 5. Edition  (junction: Admin_account M:N Creator, "Manage")
+-- 6. Edition  (admin edits creator; only Role 1 should write here, enforced in the backend)
 -- ---------------------------------------------------------------------
 CREATE TABLE Edition (
-  AdminID        VARCHAR(10) NOT NULL COMMENT 'รหัสแอดมินผู้ทำการแก้ไข',
+  AdminID        VARCHAR(10) NOT NULL COMMENT 'รหัสแอดมินผู้ทำการแก้ไข (UserID ที่ Role_ID = 1)',
   creatorID      VARCHAR(10) NOT NULL COMMENT 'รหัสครีเอเตอร์ที่ถูกแก้ไข',
   edit_logID     VARCHAR(20) NOT NULL COMMENT 'รหัสการแก้ไขข้อมูลครีเอเตอร์ (MXXXXXXXXX)',
   edit_timestamp DATETIME    NOT NULL COMMENT 'วันและเวลาที่ทำการแก้ไข',
@@ -109,7 +135,7 @@ CREATE TABLE Edition (
   PRIMARY KEY (AdminID, creatorID, edit_logID),
   KEY idx_edition_creator (creatorID),
   CONSTRAINT fk_edition_admin
-    FOREIGN KEY (AdminID) REFERENCES Admin_account (AdminID)
+    FOREIGN KEY (AdminID) REFERENCES User_account (UserID)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_edition_creator
     FOREIGN KEY (creatorID) REFERENCES Creator (creatorID)
@@ -119,7 +145,7 @@ CREATE TABLE Edition (
   COMMENT='ประวัติการแก้ไขข้อมูลครีเอเตอร์โดยแอดมิน';
 
 -- ---------------------------------------------------------------------
--- 6. Management  (Admin_account manages Admin_account, self-referencing M:N)
+-- 7. Management  (super admin manages admin; both must be Role 1, enforced in the backend)
 -- ---------------------------------------------------------------------
 CREATE TABLE Management (
   superAdminID     VARCHAR(10) NOT NULL COMMENT 'รหัสแอดมินผู้ทำการแก้ไข',
@@ -128,16 +154,16 @@ CREATE TABLE Management (
   PRIMARY KEY (superAdminID, AdminID),
   KEY idx_management_admin (AdminID),
   CONSTRAINT fk_management_super_admin
-    FOREIGN KEY (superAdminID) REFERENCES Admin_account (AdminID)
+    FOREIGN KEY (superAdminID) REFERENCES User_account (UserID)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_management_admin
-    FOREIGN KEY (AdminID) REFERENCES Admin_account (AdminID)
+    FOREIGN KEY (AdminID) REFERENCES User_account (UserID)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='การจัดการบัญชีแอดมินโดยแอดมินระดับสูง';
 
 -- ---------------------------------------------------------------------
--- 7. Creator_Platform  (multivalued attribute of Creator)
+-- 8. Creator_Platform  (multivalued attribute of Creator)
 -- ---------------------------------------------------------------------
 CREATE TABLE Creator_Platform (
   Platform  VARCHAR(50) NOT NULL COMMENT 'แพลตฟอร์มที่ครีเอเตอร์ใช้งาน (YouTube/TikTok/IG/...)',
@@ -149,15 +175,3 @@ CREATE TABLE Creator_Platform (
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='แพลตฟอร์มของครีเอเตอร์';
-
-DROP TABLE IF EXISTS `user_login`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_login` (
-  `Login_ID` int unsigned NOT NULL AUTO_INCREMENT,
-  `LoginDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `User_ID` int unsigned NOT NULL,
-  PRIMARY KEY (`Login_ID`),
-  KEY `fk_user_login` (`User_ID`),
-  CONSTRAINT `fk_user_login` FOREIGN KEY (`User_ID`) REFERENCES `user` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;  
