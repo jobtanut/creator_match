@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="/style/styles.css">
     <style>
         .thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+        .drop-zone {
+            border: 2px dashed #999; border-radius: 8px; padding: 20px;
+            text-align: center; cursor: pointer; margin-bottom: 12px;
+        }
+        .drop-zone.dragging { border-style: solid; background: #f0f0f0; }
+        .drop-zone p { margin: 0; }
+        .drop-zone img { max-width: 120px; max-height: 120px; margin-top: 10px; object-fit: cover; }
         .inactive { opacity: 0.5; }
         .form-message { margin-top: 8px; }
         .form-message.error { color: #d33; }
@@ -22,6 +29,45 @@
 
 <main class="container">
     <h1>Creator Management</h1>
+    <p><a href="/admin/search">Search Admin Accounts</a></p>
+    <p><a href="/admin/account">Manage Admin Accounts</a></p>
+
+    <!-- Search creators: name, category, status, platform (any combination, or none for all) -->
+    <section class="panel">
+        <h2>Search Creators</h2>
+        <form id="creatorSearchForm">
+            <label for="searchName">Creator Name</label>
+            <input type="text" id="searchName">
+
+            <label for="searchCategory">Category</label>
+            <select id="searchCategory">
+                <option value="">All</option>
+                <option>Food</option>
+                <option>Lifestyle</option>
+                <option>Fashion</option>
+                <option>Technology</option>
+            </select>
+
+            <label for="searchStatus">Status</label>
+            <select id="searchStatus">
+                <option value="">All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+            </select>
+
+            <label for="searchPlatform">Platform</label>
+            <select id="searchPlatform">
+                <option value="">All</option>
+                <option>TikTok</option>
+                <option>Instagram</option>
+                <option>YouTube</option>
+                <option>Facebook</option>
+            </select>
+
+            <button class="button" type="submit">Search</button>
+            <button class="button" type="button" id="searchClear">Clear</button>
+        </form>
+    </section>
 
     <section class="panel">
         <h2 id="formTitle">Add Creator</h2>
@@ -60,7 +106,13 @@
             </select>
 
             <label for="picture">Picture</label>
-            <input type="file" id="picture" name="picture" accept="image/*,.heic,.heif">
+            <!-- drag a file onto this box, or click it to choose one -->
+            <label class="drop-zone" id="dropZone" for="picture">
+                <span id="dropText">Drag and drop a picture here, or click to choose</span>
+                <img id="dropPreview" alt="" hidden>
+            </label>
+            <input type="file" id="picture" name="picture" accept="image/*,.heic,.heif" class="visually-hidden">
+            </div>
 
             <button class="button" type="submit" id="submitButton">Add Creator</button>
             <button class="button" type="button" id="cancelButton" hidden>Cancel</button>
@@ -70,7 +122,7 @@
     </section>
 
     <section>
-        <h2>Creator List</h2>
+        <h2 id="creatorListTitle">Creator List</h2>
 
         <table>
             <thead>
@@ -98,6 +150,6 @@
 
 <script src="/js/nav.js"></script>
 <script>requireAdmin();</script>
-<script src="/js/admin.js"></script>
+<script src="/js/admin/admin.js"></script>
 </body>
 </html>
