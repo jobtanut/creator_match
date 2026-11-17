@@ -1,5 +1,7 @@
 -- =====================================================================
--- CreatorMatch database schema (MySQL 8.0.16+)
+-- sec1_gr11_database.sql: CreatorMatch database (MySQL 8.0.16+)
+-- Creates the database, every table, and sample data. Safe to re-run: it drops and recreates everything.
+-- Run in MySQL Workbench (File > Run SQL Script) or: mysql -u root -p < sec1_gr11_database.sql
 -- Accounts live in one table, User_account, with Role_ID:
 --   1 = Admin   (must be linked to a Team_Member)
 --   2 = User    (regular sign-up, no Team_Member link)
@@ -27,6 +29,7 @@ DROP TABLE IF EXISTS Team_Member;
 -- ---------------------------------------------------------------------
 CREATE TABLE Team_Member (
   TeamMemberID        VARCHAR(10)  NOT NULL COMMENT 'รหัสสมาชิกทีม (TXXXXXXXXX)',
+  student_id          VARCHAR(10)  NULL     COMMENT 'รหัสนักศึกษา',
   email               VARCHAR(100) NOT NULL COMMENT 'อีเมลของสมาชิกทีม',
   t_first_name        VARCHAR(50)  NOT NULL COMMENT 'ชื่อจริงของสมาชิกทีม',
   t_last_name         VARCHAR(50)  NOT NULL COMMENT 'นามสกุลของสมาชิกทีม',
@@ -34,6 +37,7 @@ CREATE TABLE Team_Member (
   role                VARCHAR(50)  NOT NULL COMMENT 'บทบาทของสมาชิกทีมในระบบ',
   phone               VARCHAR(15)  NULL     COMMENT 'หมายเลขโทรศัพท์ของสมาชิกทีม',
   member_picture_link VARCHAR(255) NULL     COMMENT 'ลิงก์รูปโปรไฟล์ของสมาชิกทีม',
+  social_link         VARCHAR(255) NULL     COMMENT 'ลิงก์ Social Media ส่วนตัวของสมาชิกทีม',
   PRIMARY KEY (TeamMemberID),
   UNIQUE KEY uq_team_member_email (email),
   CONSTRAINT chk_team_member_email CHECK (CHAR_LENGTH(email) >= 5),
@@ -176,3 +180,96 @@ CREATE TABLE Creator_Platform (
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='แพลตฟอร์มของครีเอเตอร์';
+
+-- =====================================================================
+-- SAMPLE DATA
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Team members (Section 1, Group 11). [bracketed] values are placeholders to replace.
+-- Photos: put the image in sec1_gr11_fe_src/public/team/ and set member_picture_link to '/team/<file>'.
+-- ---------------------------------------------------------------------
+INSERT INTO Team_Member (TeamMemberID, student_id, email, t_first_name, t_last_name, position, role, phone, member_picture_link, social_link) VALUES
+('T000000001', '6887027', 'job@creatormatch.com',              'Tanut',    'Noumanong',   'Developer',   'Admin', NULL, NULL, 'https://github.com/jobtanut'),
+('T000000002', '6887004', '[benya-email]@creatormatch.com',    'Benya',    'Shinno',      'Team Member', 'Admin', NULL, NULL, NULL),
+('T000000003', '6887030', '[naphat-email]@creatormatch.com',   'Naphat',   '[last name]', 'Team Member', 'Admin', NULL, NULL, NULL),
+('T000000004', '6887048', '[monthisa-email]@creatormatch.com', 'Monthisa', '[last name]', 'Team Member', 'Admin', NULL, NULL, NULL),
+('T000000005', '6887095', '[kunticha-email]@creatormatch.com', 'Kunticha', '[last name]', 'Team Member', 'Admin', NULL, NULL, NULL);
+
+-- ---------------------------------------------------------------------
+-- Admin accounts (Role_ID = 1), linked to team members.  Logins:
+--   admin  / admin1234     benya / benya1234     naphat / naphat1234
+-- ---------------------------------------------------------------------
+INSERT INTO User_account (UserID, username, email, password, first_name, last_name, Position, Role_ID, TeamMemberID) VALUES
+('U000000001', 'admin',  'job@creatormatch.com',            'admin1234',  'Tanut',  'Noumanong',   'Developer',   1, 'T000000001'),
+('U000000002', 'benya',  '[benya-email]@creatormatch.com',  'benya1234',  'Benya',  'Shinno',      'Team Member', 1, 'T000000002'),
+('U000000003', 'naphat', '[naphat-email]@creatormatch.com', 'naphat1234', 'Naphat', '[last name]', 'Team Member', 1, 'T000000003');
+
+-- ---------------------------------------------------------------------
+-- Regular users (Role_ID = 2), created through Sign Up.  Logins:
+--   user1 / user1pass     user2 / user2pass
+-- ---------------------------------------------------------------------
+INSERT INTO User_account (UserID, username, email, password, first_name, last_name, Role_ID) VALUES
+('U000000101', 'user1', 'user1@example.com', 'user1pass', 'Somchai', 'Jaidee', 2),
+('U000000102', 'user2', 'user2@example.com', 'user2pass', 'Suda',    'Rakdee', 2);
+
+-- Creators (exported from the live database)
+INSERT INTO Creator (creatorID, category, c_first_name, c_last_name, creator_name, followers, creator_picture_Link, Description, Status) VALUES
+('C907420921', 'Fashion', 'polly', 'Pinsumrong', 'aomsin', 99999, '/creators/1794907419484.jpg', 'tum dai tuk yang loei jaaa', 'Active'),
+('C000000106', 'Fashion', 'Bank', 'Thanakorn', 'BankFits', 210000, NULL, 'Streetwear lookbooks and sneaker reviews', 'Active'),
+('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1794904671516.jpg', 'Eat with Gun', 'Active'),
+('C000000103', 'Lifestyle', 'Fah', 'Chaiyaporn', 'FahDaily', 1200000, NULL, 'Daily vlogs, morning routines and room makeovers', 'Active'),
+('C901951047', 'Food', 'Gunticha', 'Inma', 'Gun Inma', 10000, '/creators/1794902052857.jpg', 'Likes Food', 'Active'),
+('C000000109', 'Food', 'Jay', 'Boonmee', 'JayDessert', 880000, '/creators/1794908821274.avif', 'Dessert recipes and cafe dessert reviews', 'Active'),
+('C901885581', 'Food', 'Tanut', 'Noumanong', 'Job Tanut', 0, NULL, 'Personal Systems that sync tools and make workflows efficient', 'Active'),
+('C000000102', 'Food', 'Krit', 'Somboon', 'KritCooks', 98000, NULL, 'Easy Thai home cooking in under 20 minutes', 'Active'),
+('C000000110', 'Lifestyle', 'Mint', 'Chanthara', 'MintFitLife', 150000, NULL, 'Home workouts and healthy meal prep', 'Inactive'),
+('C000000108', 'Technology', 'Mook', 'Prasert', 'MookCodes', 15000, NULL, 'Beginner coding tutorials and student life in ICT', 'Active'),
+('C000000104', 'Lifestyle', 'Nont', 'Wongsiri', 'NontSlowLife', 35000, NULL, 'Slow living, cafe hopping and weekend trips', 'Active'),
+('C000000101', 'Food', 'Ploy', 'Rattanakul', 'PloyEats', 450000, NULL, 'Street food tours around Bangkok and honest restaurant reviews', 'Active'),
+('C000000105', 'Fashion', 'Pim', 'Srisuk', 'StyleByPim', 670000, NULL, 'Thrifted outfits and styling tips on a budget', 'Active'),
+('C000000107', 'Technology', 'Tom', 'Kittipong', 'TechTom', 320000, NULL, 'Gadget reviews and phone comparisons in Thai', 'Active');
+
+-- Their platforms
+INSERT INTO Creator_Platform (Platform, creatorID) VALUES
+('message', 'C907420921'),
+('TikTok', 'C000000106'),
+('YouTube', 'C000000106'),
+('Facebook', 'C903652215'),
+('Instagram', 'C000000103'),
+('TikTok', 'C000000103'),
+('YouTube', 'C000000103'),
+('Instagram', 'C901951047'),
+('Facebook', 'C000000109'),
+('Instagram', 'C000000109'),
+('TikTok', 'C000000109'),
+('YouTube', 'C901885581'),
+('Facebook', 'C000000102'),
+('YouTube', 'C000000102'),
+('Instagram', 'C000000110'),
+('YouTube', 'C000000110'),
+('YouTube', 'C000000108'),
+('Instagram', 'C000000104'),
+('Instagram', 'C000000101'),
+('TikTok', 'C000000101'),
+('Instagram', 'C000000105'),
+('TikTok', 'C000000105'),
+('Facebook', 'C000000107'),
+('YouTube', 'C000000107');
+
+-- ---------------------------------------------------------------------
+-- Example history rows, so Login_log, Edition and Management are not empty
+-- ---------------------------------------------------------------------
+INSERT INTO Login_log (Login_log_ID, login_datetime, logout_datetime, login_status, UserID) VALUES
+('L0000000001', '2026-11-16 09:00:00', '2026-11-16 10:30:00', 'Success', 'U000000001'),
+('L0000000002', '2026-11-16 13:15:00', NULL,                  'Success', 'U000000002'),
+('L0000000003', '2026-11-17 08:45:00', NULL,                  'Failed',  'U000000003');
+
+INSERT INTO Edition (AdminID, creatorID, edit_logID, edit_timestamp, edit_type) VALUES
+('U000000001', 'C000000101', 'M0000000001', '2026-11-16 09:10:00', 'Create'),
+('U000000001', 'C000000103', 'M0000000002', '2026-11-16 09:12:00', 'Create'),
+('U000000002', 'C000000101', 'M0000000003', '2026-11-16 13:20:00', 'Update');
+
+INSERT INTO Management (superAdminID, AdminID, manage_timestamp) VALUES
+('U000000001', 'U000000002', '2026-11-15 10:00:00'),
+('U000000001', 'U000000003', '2026-11-15 10:05:00');

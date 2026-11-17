@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Creator Management</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        .thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+        .inactive { opacity: 0.5; }
+        .form-message.error { color: #d33; }
+        .form-message.success { color: #2a8a3e; }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Creator Manage</h1>
+    <p>
+        <a class="button" href="/admin/creatorm">Add Creator</a>
+        <a href="/admin">Back to Admin Menu</a>
+    </p>
+
+    <!-- Search creators: name, category, status, platform (any combination, or none for all) -->
+    <section class="panel">
+        <h2>Search Creators</h2>
+        <form id="creatorSearchForm">
+            <label for="searchName">Creator Name</label>
+            <input type="text" id="searchName">
+
+            <label for="searchCategory">Category</label>
+            <select id="searchCategory">
+                <option value="">All</option>
+                <option>Food</option>
+                <option>Lifestyle</option>
+                <option>Fashion</option>
+                <option>Technology</option>
+            </select>
+
+            <label for="searchStatus">Status</label>
+            <select id="searchStatus">
+                <option value="">All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+            </select>
+
+            <label for="searchPlatform">Platform</label>
+            <select id="searchPlatform">
+                <option value="">All</option>
+                <option>TikTok</option>
+                <option>Instagram</option>
+                <option>YouTube</option>
+                <option>Facebook</option>
+            </select>
+
+            <button class="button" type="submit">Search</button>
+            <button class="button" type="button" id="searchClear">Clear</button>
+        </form>
+    </section>
+
+    <section>
+        <h2 id="creatorListTitle">Creator List</h2>
+        <p id="listMessage" class="form-message"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Creator</th>
+                    <th>Category</th>
+                    <th>Followers</th>
+                    <th>Platforms</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="creatorRows">
+                <tr><td colspan="8">Loading...</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>requireAdmin();</script>
+<script src="/js/admin/common.js"></script>
+<script src="/js/admin/creator_search.js"></script>
+</body>
+</html>

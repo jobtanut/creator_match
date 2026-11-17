@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Admin</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        .admin-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Admin</h1>
+    <p id="welcome"></p>
+
+    <!-- Admin menu: every admin task starts from here -->
+    <section class="admin-menu">
+        <article class="card">
+            <h2>Admin Manage</h2>
+            <p>Search, add, edit and delete admin accounts.</p>
+            <a class="button" href="/admin/search">Open</a>
+        </article>
+
+        <article class="card">
+            <h2>Creator Manage</h2>
+            <p>Search, add, edit and delete creators.</p>
+            <a class="button" href="/admin/creators">Open</a>
+        </article>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script src="/js/admin/menu.js"></script>
+</body>
+</html>
