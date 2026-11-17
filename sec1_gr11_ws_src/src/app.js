@@ -8,6 +8,7 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 const cors = require('cors');
 const multer = require('multer');
+const convertHeic = require('heic-convert');   // npm install heic-convert
 const dotenv = require('dotenv').config()
 const port = process.env.PORT;
 const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(cors());
 
+fs.mkdirSync(path.join(__dirname, '..', '..', 'sec1_gr11_fe_src', 'public', 'creators'), { recursive: true });
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '..', '..', 'sec1_gr11_fe_src', 'public', 'creators'));
@@ -38,6 +40,34 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage});
 
+// Convert HEIC
+const isHeic = (file) =>
+    /\.(heic|heif)$/i.test(file.originalname) || /image\/hei[cf]/i.test(file.mimetype);
+
+const fixHeic = async (req, res, next) => {
+    if (!req.file || !isHeic(req.file)) return next();
+
+    try {
+        const input = await fs.promises.readFile(req.file.path);
+        const output = await convertHeic({ buffer: input, format: 'JPEG', quality: 0.85 });
+
+        const jpgName = path.parse(req.file.filename).name + '.jpg';
+        const jpgPath = path.join(path.dirname(req.file.path), jpgName);
+        await fs.promises.writeFile(jpgPath, Buffer.from(output));
+        await fs.promises.unlink(req.file.path);   // delete the original .heic
+
+        req.file.filename = jpgName;
+        req.file.path = jpgPath;
+        req.file.mimetype = 'image/jpeg';
+        console.log('Converted HEIC to', jpgName);
+        next();
+    } catch (err) {
+        console.error('HEIC conversion failed:', err.message);
+        await fs.promises.unlink(req.file.path).catch(() => {});
+        res.status(400).json({ error: true, message: 'Could not read this HEIC photo, please use JPG or PNG' });
+    }
+};
+
 // DB connection
 const conn = mysql.createConnection({
     host: process.env.DBHOST,
@@ -45,6 +75,8 @@ const conn = mysql.createConnection({
     password: process.env.DBPASSWORD,
     database: process.env.DBDATABASE
 });
+
+const db = conn.promise();
 
 conn.connect((err) => {
     if (err) return console.error('DB connection failed:', err.message);
@@ -176,7 +208,10 @@ router.post('/signup', (req, res) => {
         return showPageError (res, SIGNUP_HTML, 'Please fill in every field');
     }
     if (password.length < 8) {
-        return showPageError (res, SIGNUP_HTML, 'Passwords do not match');
+    return showPageError(res, SIGNUP_HTML, 'Password must be at least 8 characters');
+}
+    if (password !== confirm_password) {
+        return showPageError(res, SIGNUP_HTML, 'Passwords do not match');
     }
 
     // Create Account
@@ -190,7 +225,7 @@ router.post('/signup', (req, res) => {
             if (err.code === 'ER_DUP_ENTRY') {
                 const msg = err.message.includes('uq_user_username')?'Username is already taken':'Email is already used'
                 console.log('Result: FAILED', msg);
-                return showPageError(res, SIGNUP_HTML, 409);
+                return showPageError(res, SIGNUP_HTML, msg, 409);
             }
             console.error('Signup insert error:', err.message);
             return showPageError(res, SIGNUP_HTML, 'Server error, please try again', 500);
@@ -200,6 +235,315 @@ router.post('/signup', (req, res) => {
         res.redirect(`${FE_URL}/auth/login`)
     })
 })
+
+//Creator Management
+//Check Fields
+const readCreatorForm = (body) => {
+    const creator_name = (body.creator_name || "").trim();
+    const category = (body.category || '').trim();
+    const status = body.Status || 'Active';
+    const followers = Number(body.followers || 0);
+
+    if (!creator_name) return { error: 'Creator name is required' };
+    if (!category) return { error: 'Category is required '};
+    if (!['Active', 'Inactive'].includes(status)) return { error: 'Status must be Active or Inactive' };
+    if (!Number.isInteger(followers) || followers < 0) return { error: 'Followers must be a whole number, 0 or more' };
+
+    const platforms = [...new Set(
+        (body.platforms || '').split(',').map((p) => p.trim()).filter((p) => p)
+    )];
+
+    return {
+        data: {
+            creator_name,
+            category,
+            status,
+            followers,
+            c_first_name: (body.c_first_name || '').trim() || null,
+            c_last_name: (body.c_last_name || '').trim() || null,
+            Description: (body.Description || '').trim() || null,
+            platforms,
+        },
+    };
+};
+
+const logEdit = (adminId, creatorId, type) => {
+    const sql = 'INSERT INTO Edition (AdminID, CreatorID, edit_logID, edit_timestamp, edit_type) VALUES (?, ?, ?, ?, ?)';
+    return db.query(sql, [adminId,creatorId, 'M' + Date.now(), new Date(), type]);
+};
+
+// Replaces a creator's platforms with a new list
+const savePlatforms = async (creatorId, platforms) => {
+    await db.query('DELETE FROM Creator_Platform WHERE creatorID = ?', [creatorId]);
+    for (const platform of platforms) {
+        await db.query('INSERT INTO Creator_Platform (Platform, creatorID) VALUES (?, ?)', [platform, creatorId]);
+    }
+};
+
+//Get Creators
+router.get('/creators', async (req, res) => {
+    try {
+        const params = [];
+        let where = '';
+        if (req.query.status) {
+            where = 'WHERE c.Status = ?';
+            params.push(req.query.status);
+        }
+
+        const [rows] = await db.query(
+            `SELECT c.*, GROUP_CONCAT(cp.Platform ORDER BY cp.Platform SEPARATOR ', ') AS platforms
+             FROM Creator c
+             LEFT JOIN Creator_Platform cp ON c.creatorID = cp.creatorID
+             ${where}
+             GROUP BY c.creatorID
+             ORDER BY c.creator_name`,
+            params
+        );
+
+        res.json({ error: false, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load creators' });
+    }
+});
+
+// Home Page Creators
+router.get('/creators/featured', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT c.creatorID, c.creator_name, c.category, c.followers, c.creator_picture_Link,
+                    GROUP_CONCAT(cp.Platform ORDER BY cp.Platform SEPARATOR ', ') AS platforms
+             FROM Creator c
+             LEFT JOIN Creator_Platform cp ON c.creatorID = cp.creatorID
+             WHERE c.Status = 'Active'
+             GROUP BY c.creatorID
+             ORDER BY RAND()
+             LIMIT 6`
+        );
+        res.json({ error: false, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load featured creators' });
+    }
+});
+
+// Follower range of active creators, for the search page slider
+router.get('/creators/follower-range', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT COALESCE(MIN(followers), 0) AS min, COALESCE(MAX(followers), 0) AS max
+             FROM Creator WHERE Status = 'Active'`
+        );
+        res.json({ error: false, min: Number(rows[0].min), max: Number(rows[0].max) });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load follower range' });
+    }
+});
+
+// Search creators (public): only Active creators
+router.get('/creators/search', async (req, res) => {
+    try {
+        const name = (req.query.name || '').trim();
+        const category = (req.query.category || '').trim();
+        // ?platform=A&platform=B arrives as an array, a single one as a string
+        const platforms = [].concat(req.query.platform || []).filter((p) => p);
+        const minFollowers = req.query.min_followers ? Number(req.query.min_followers) : null;
+        const maxFollowers = req.query.max_followers ? Number(req.query.max_followers) : null;
+
+        if ([minFollowers, maxFollowers].some((n) => n !== null && (!Number.isInteger(n) || n < 0))) {
+            return res.status(400).json({ error: true, message: 'Follower range must be whole numbers, 0 or more' });
+        }
+        if (minFollowers !== null && maxFollowers !== null && minFollowers > maxFollowers) {
+            return res.status(400).json({ error: true, message: 'Minimum followers cannot be more than maximum' });
+        }
+
+        const conditions = ["c.Status = 'Active'"];
+        const params = [];
+
+        if (name) {
+            conditions.push('c.creator_name LIKE ?');
+            params.push(`%${name}%`);
+        }
+        if (category) {
+            conditions.push('c.category = ?');
+            params.push(category);
+        }
+        if (platforms.length > 0) {
+            // creator is on ANY of the ticked platforms
+            conditions.push('c.creatorID IN (SELECT creatorID FROM Creator_Platform WHERE Platform IN (?))');
+            params.push(platforms);
+        }
+        if (minFollowers !== null) {
+            conditions.push('c.followers >= ?');
+            params.push(minFollowers);
+        }
+        if (maxFollowers !== null) {
+            conditions.push('c.followers <= ?');
+            params.push(maxFollowers);
+        }
+
+        const [rows] = await db.query(
+            `SELECT c.creatorID, c.creator_name, c.category, c.followers, c.creator_picture_Link,
+                    GROUP_CONCAT(cp.Platform ORDER BY cp.Platform SEPARATOR ', ') AS platforms
+             FROM Creator c
+             LEFT JOIN Creator_Platform cp ON c.creatorID = cp.creatorID
+             WHERE ${conditions.join(' AND ')}
+             GROUP BY c.creatorID
+             ORDER BY c.creator_name`,
+            params
+        );
+
+        res.json({ error: false, count: rows.length, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Search failed' });
+    }
+});
+
+//One Creator
+router.get('/creators/:id', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT c.*, GROUP_CONCAT(cp.Platform ORDER BY cp.Platform SEPARATOR ', ') AS platforms
+             FROM Creator c
+             LEFT JOIN Creator_Platform cp ON c.creatorID = cp.creatorID
+             WHERE c.creatorID = ?
+             GROUP BY c.creatorID`,
+            [req.params.id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: true, message: 'Creator not found' });
+        }
+        res.json({ error: false, data: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load creator' });
+    }
+});
+
+// Add Creators
+router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'), fixHeic, async (req, res) => {
+    const { data, error } = readCreatorForm(req.body);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    const creatorId = 'C' + String(Date.now()).slice(-9);   // fits VARCHAR(10)
+    const picture = req.file ? `/creators/${req.file.filename}` : null;
+
+    try {
+        await db.beginTransaction();
+
+        await db.query(
+            `INSERT INTO Creator (creatorID, category, c_first_name, c_last_name, creator_name,
+                                  followers, creator_picture_Link, Description, Status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [creatorId, data.category, data.c_first_name, data.c_last_name, data.creator_name,
+             data.followers, picture, data.Description, data.status]
+        );
+        await savePlatforms(creatorId, data.platforms);
+        await logEdit(req.user.UserID, creatorId, 'Create');
+
+        await db.commit();
+        console.log(`Creator ${creatorId} created by ${req.user.username}`);
+        res.json({ error: false, message: 'Creator added', creatorID: creatorId });
+    } catch (err) {
+        await db.rollback();
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not add creator' });
+    }
+});
+
+
+//Edit Creators
+router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture'), fixHeic, async (req, res) => {
+    const creatorId = req.params.id;
+    const { data, error } = readCreatorForm(req.body);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    try {
+        const [found] = await db.query('SELECT creatorID FROM Creator WHERE creatorID = ?', [creatorId]);
+        if (found.length === 0) {
+            return res.status(404).json({ error: true, message: 'Creator not found' });
+        }
+
+        await db.beginTransaction();
+
+        await db.query(
+            `UPDATE Creator
+             SET category = ?, c_first_name = ?, c_last_name = ?, creator_name = ?,
+                 followers = ?, Description = ?, Status = ?
+             WHERE creatorID = ?`,
+            [data.category, data.c_first_name, data.c_last_name, data.creator_name,
+             data.followers, data.Description, data.status, creatorId]
+        );
+
+        if (req.file) {
+            await db.query('UPDATE Creator SET creator_picture_Link = ? WHERE creatorID = ?',
+                [`/creators/${req.file.filename}`, creatorId]);
+        }
+
+        await savePlatforms(creatorId, data.platforms);
+        await logEdit(req.user.UserID, creatorId, 'Update');
+
+        await db.commit();
+        console.log(`Creator ${creatorId} updated by ${req.user.username}`);
+        res.json({ error: false, message: 'Creator updated' });
+    } catch (err) {
+        await db.rollback();
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not update creator' });
+    }
+});
+
+/*
+  Delete creator (admin): removes the creator for good.
+  Their platforms, edit history (Edition rows) and picture file are removed too.
+  DELETE http://localhost:3030/creators/C000000001
+*/
+router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    const creatorId = req.params.id;
+
+    try {
+        const [found] = await db.query(
+            'SELECT creator_name, creator_picture_Link FROM Creator WHERE creatorID = ?', [creatorId]
+        );
+        if (found.length === 0) {
+            return res.status(404).json({ error: true, message: 'Creator not found' });
+        }
+
+        await db.beginTransaction();
+
+        // children first, because their foreign keys point at Creator
+        await db.query('DELETE FROM Edition WHERE creatorID = ?', [creatorId]);
+        await db.query('DELETE FROM Creator_Platform WHERE creatorID = ?', [creatorId]);
+        await db.query('DELETE FROM Creator WHERE creatorID = ?', [creatorId]);
+
+        await db.commit();
+
+        // remove the picture file from the FE public folder (if there was one)
+        const picture = found[0].creator_picture_Link;   // e.g. /creators/1763350000000.jpg
+        if (picture) {
+            const picturePath = path.join(__dirname, '..', '..', 'sec1_gr11_fe_src', 'public', picture);
+            fs.promises.unlink(picturePath).catch(() => {});
+        }
+
+        console.log(`Creator ${creatorId} (${found[0].creator_name}) deleted by ${req.user.username}`);
+        res.json({ error: false, message: 'Creator deleted' });
+    } catch (err) {
+        await db.rollback();
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not delete creator' });
+    }
+});
+
+// ------------------ ERRORS ------------------
+// Catches upload errors (file too big, not an image) and anything else unexpected
+app.use((err, req, res, next) => {
+    console.error(err.message);
+    res.status(400).json({ error: true, message: err.message });
+});
+
 
 app.listen(port, () => {
     console.log(`Listening at port: ${port}`)

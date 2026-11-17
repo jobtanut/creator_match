@@ -115,6 +115,7 @@ CREATE TABLE Creator (
   c_first_name         VARCHAR(50)  NULL     COMMENT 'ชื่อจริงของครีเอเตอร์',
   c_last_name          VARCHAR(50)  NULL     COMMENT 'นามสกุลของครีเอเตอร์',
   creator_name         VARCHAR(100) NOT NULL COMMENT 'ชื่อที่ใช้แสดงผล/ชื่อช่องของครีเอเตอร์',
+  followers            INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'จำนวนผู้ติดตาม',
   creator_picture_Link VARCHAR(255) NULL     COMMENT 'ลิงก์รูปโปรไฟล์ของครีเอเตอร์',
   Description          VARCHAR(255) NULL     COMMENT 'คำอธิบายเกี่ยวกับครีเอเตอร์',
   Status               VARCHAR(20)  NOT NULL COMMENT 'สถานะของครีเอเตอร์ในระบบ (Active/Inactive)',
@@ -139,7 +140,7 @@ CREATE TABLE Edition (
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_edition_creator
     FOREIGN KEY (creatorID) REFERENCES Creator (creatorID)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
+    ON UPDATE CASCADE ON DELETE CASCADE,   -- deleting a creator also removes their edit history
   CONSTRAINT chk_edit_type CHECK (edit_type IN ('Create', 'Update', 'Delete'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='ประวัติการแก้ไขข้อมูลครีเอเตอร์โดยแอดมิน';
