@@ -496,11 +496,7 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
     }
 });
 
-/*
-  Delete creator (admin): removes the creator for good.
-  Their platforms, edit history (Edition rows) and picture file are removed too.
-  DELETE http://localhost:3030/creators/C000000001
-*/
+//Delete Creators
 router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const creatorId = req.params.id;
 
