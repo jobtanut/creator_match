@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CreatorMatch - Admin</title>
+    <title>CreatorMatch - Add Creator</title>
     <link rel="stylesheet" href="/style/styles.css">
     <style>
-        .thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
         .drop-zone {
             border: 2px dashed #999; border-radius: 8px; padding: 20px;
             text-align: center; cursor: pointer; margin-bottom: 12px;
         }
         .drop-zone.dragging { border-style: solid; background: #f0f0f0; }
-        .drop-zone p { margin: 0; }
+        .drop-zone { display: block; }
+        .drop-zone img { display: block; margin: 10px auto 0; }
+        /* hides the file input but keeps it working (display:none can block the picker in some browsers) */
+        .visually-hidden {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0 0 0 0); border: 0;
+        }
         .drop-zone img { max-width: 120px; max-height: 120px; margin-top: 10px; object-fit: cover; }
-        .inactive { opacity: 0.5; }
-        .form-message { margin-top: 8px; }
         .form-message.error { color: #d33; }
         .form-message.success { color: #2a8a3e; }
     </style>
@@ -28,49 +31,11 @@
 </header>
 
 <main class="container">
-    <h1>Creator Management</h1>
-    <p><a href="/admin/search">Search Admin Accounts</a></p>
-    <p><a href="/admin/account">Manage Admin Accounts</a></p>
+    <p><a href="/admin/creators">Back to Creator Manage</a></p>
 
-    <!-- Search creators: name, category, status, platform (any combination, or none for all) -->
+    <!-- One page for both: /admin/creator = add, /admin/creator?id=C000000001 = edit -->
     <section class="panel">
-        <h2>Search Creators</h2>
-        <form id="creatorSearchForm">
-            <label for="searchName">Creator Name</label>
-            <input type="text" id="searchName">
-
-            <label for="searchCategory">Category</label>
-            <select id="searchCategory">
-                <option value="">All</option>
-                <option>Food</option>
-                <option>Lifestyle</option>
-                <option>Fashion</option>
-                <option>Technology</option>
-            </select>
-
-            <label for="searchStatus">Status</label>
-            <select id="searchStatus">
-                <option value="">All</option>
-                <option>Active</option>
-                <option>Inactive</option>
-            </select>
-
-            <label for="searchPlatform">Platform</label>
-            <select id="searchPlatform">
-                <option value="">All</option>
-                <option>TikTok</option>
-                <option>Instagram</option>
-                <option>YouTube</option>
-                <option>Facebook</option>
-            </select>
-
-            <button class="button" type="submit">Search</button>
-            <button class="button" type="button" id="searchClear">Clear</button>
-        </form>
-    </section>
-
-    <section class="panel">
-        <h2 id="formTitle">Add Creator</h2>
+        <h1 id="formTitle">Add Creator</h1>
 
         <form id="creatorForm">
             <label for="creator_name">Creator Name</label>
@@ -105,42 +70,21 @@
                 <option>Inactive</option>
             </select>
 
-            <label for="picture">Picture</label>
-            <!-- drag a file onto this box, or click it to choose one -->
+            <p><b>Picture</b></p>
+            <!-- the box is a <label> for the file input, so clicking it opens the file picker
+                 without any JavaScript. Dropping a file onto it is handled in creator-form.js -->
             <label class="drop-zone" id="dropZone" for="picture">
                 <span id="dropText">Drag and drop a picture here, or click to choose</span>
                 <img id="dropPreview" alt="" hidden>
             </label>
             <input type="file" id="picture" name="picture" accept="image/*,.heic,.heif" class="visually-hidden">
-            </div>
 
             <button class="button" type="submit" id="submitButton">Add Creator</button>
-            <button class="button" type="button" id="cancelButton" hidden>Cancel</button>
+            <a class="button" href="/admin/creators">Cancel</a>
+            <button class="button" type="button" id="deleteButton" hidden>Delete Creator</button>
 
             <p id="formMessage" class="form-message"></p>
         </form>
-    </section>
-
-    <section>
-        <h2 id="creatorListTitle">Creator List</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>ID</th>
-                    <th>Creator</th>
-                    <th>Category</th>
-                    <th>Followers</th>
-                    <th>Platforms</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="creatorRows">
-                <tr><td colspan="8">Loading...</td></tr>
-            </tbody>
-        </table>
     </section>
 </main>
 
@@ -150,6 +94,7 @@
 
 <script src="/js/nav.js"></script>
 <script>requireAdmin();</script>
-<script src="/js/admin/admin.js"></script>
+<script src="/js/admin/common.js"></script>
+<script src="/js/admin/creator_manage.js"></script>
 </body>
 </html>

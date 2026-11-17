@@ -1,7 +1,7 @@
-// account-form.js: Add / Edit Admin page.
+// admin_manage.js: Add / Edit Admin page.
 //   /admin/account                 -> add a new admin
 //   /admin/account?id=U000000002   -> edit (and delete) that admin
-// Needs nav.js and admin-common.js loaded first.
+// Needs nav.js and common.js loaded first.
 
 const form = document.getElementById('adminForm');
 const message = document.getElementById('formMessage');
@@ -56,10 +56,10 @@ form.addEventListener('submit', async (e) => {
     try {
         if (editingId) {
             await api('PUT', `/admins/${encodeURIComponent(editingId)}`, body);
-            window.location.href = '/admin/accounts?msg=' + encodeURIComponent('Admin updated');
+            window.location.href = '/admin/search?msg=' + encodeURIComponent('Admin updated');
         } else {
             await api('POST', '/admins', body);
-            window.location.href = '/admin/accounts?msg=' + encodeURIComponent('Admin added');
+            window.location.href = '/admin/search?msg=' + encodeURIComponent('Admin added');
         }
     } catch (err) {
         showMessage(message, err.message, 'error');
@@ -72,7 +72,7 @@ document.getElementById('deleteButton').addEventListener('click', async () => {
 
     try {
         await api('DELETE', `/admins/${encodeURIComponent(editingId)}`);
-        window.location.href = '/admin/accounts?msg=' + encodeURIComponent('Admin deleted');
+        window.location.href = '/admin/search?msg=' + encodeURIComponent('Admin deleted');
     } catch (err) {
         showMessage(message, err.message, 'error');
     }

@@ -1,6 +1,6 @@
-// admin.js: Creator Management page (search + list + delete).
+// creator_search.js: Creator Manage page, /admin/creators (search + list + delete).
 // Adding and editing happen on their own page: /admin/creator (add) and /admin/creator?id=... (edit).
-// Needs nav.js and admin-common.js loaded first.
+// Needs nav.js and common.js loaded first.
 
 const rows = document.getElementById('creatorRows');
 const listMessage = document.getElementById('listMessage');
@@ -76,13 +76,6 @@ async function deleteCreator(id) {
         showMessage(listMessage, err.message, 'error');
     }
 }
-
-// click the box
-dropZone.addEventListener('click', () => pictureInput.click());
-pictureInput.addEventListener('change', showChosenFile);
-
-// clicking the box opens the file picker
-pictureInput.addEventListener('change', showChosenFile);
 
 showFlashMessage(listMessage);   // "Creator added" / "Creator updated" after coming back from the form
 loadCreators();
