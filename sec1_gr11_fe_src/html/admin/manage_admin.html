@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Add Admin</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        .form-message.error { color: #d33; }
+        .form-message.success { color: #2a8a3e; }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <p><a href="/admin/accounts">Back to Admin Accounts</a></p>
+
+    <!-- One page for both: /admin/account = add, /admin/account?id=U000000002 = edit -->
+    <section class="panel">
+        <h1 id="formTitle">Add Admin</h1>
+
+        <form id="adminForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" maxlength="30" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" maxlength="100" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="8" placeholder="At least 8 characters">
+
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" maxlength="50" required>
+
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" maxlength="50" required>
+
+            <label for="Position">Position</label>
+            <input type="text" id="Position" name="Position" maxlength="50">
+
+            <label for="TeamMemberID">Team Member</label>
+            <select id="TeamMemberID" name="TeamMemberID">
+                <option value="">None</option>
+            </select>
+
+            <button class="button" type="submit" id="submitButton">Add Admin</button>
+            <a class="button" href="/admin/accounts">Cancel</a>
+            <button class="button" type="button" id="deleteButton" hidden>Delete Admin</button>
+
+            <p id="formMessage" class="form-message"></p>
+        </form>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>requireAdmin();</script>
+<script src="/js/admin/admin-common.js"></script>
+<script src="/js/admin/account-form.js"></script>
+</body>
+</html>

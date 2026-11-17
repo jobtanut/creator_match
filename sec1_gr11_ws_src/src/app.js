@@ -40,7 +40,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage});
 
-// Convert HEIC
+// iPhone photos are HEIC, which browsers can't display.
+// After multer saves the file, convert HEIC/HEIF to JPG and use the JPG instead.
 const isHeic = (file) =>
     /\.(heic|heif)$/i.test(file.originalname) || /image\/hei[cf]/i.test(file.mimetype);
 
@@ -280,15 +281,44 @@ const savePlatforms = async (creatorId, platforms) => {
     }
 };
 
-//Get Creators
+/*
+  List / search creators (admin page): shows Active AND Inactive creators.
+  No filters = every creator. Filters can be combined.
+  Test 1 (all creators):
+    method: GET
+    URL: http://localhost:3030/creators
+  Test 2 (search with criteria):
+    method: GET
+    URL: http://localhost:3030/creators?name=mint&category=Food&status=Active&platform=TikTok
+*/
 router.get('/creators', async (req, res) => {
     try {
+        const name = (req.query.name || '').trim();
+        const category = (req.query.category || '').trim();
+        const status = (req.query.status || '').trim();
+        const platforms = [].concat(req.query.platform || []).filter((p) => p);
+
+        const conditions = [];
         const params = [];
-        let where = '';
-        if (req.query.status) {
-            where = 'WHERE c.Status = ?';
-            params.push(req.query.status);
+
+        if (name) {
+            conditions.push('c.creator_name LIKE ?');
+            params.push(`%${name}%`);
         }
+        if (category) {
+            conditions.push('c.category = ?');
+            params.push(category);
+        }
+        if (status) {
+            conditions.push('c.Status = ?');
+            params.push(status);
+        }
+        if (platforms.length > 0) {
+            conditions.push('c.creatorID IN (SELECT creatorID FROM Creator_Platform WHERE Platform IN (?))');
+            params.push(platforms);
+        }
+
+        const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
 
         const [rows] = await db.query(
             `SELECT c.*, GROUP_CONCAT(cp.Platform ORDER BY cp.Platform SEPARATOR ', ') AS platforms
@@ -300,14 +330,14 @@ router.get('/creators', async (req, res) => {
             params
         );
 
-        res.json({ error: false, data: rows });
+        res.json({ error: false, count: rows.length, data: rows });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: true, message: 'Could not load creators' });
     }
 });
 
-// Home Page Creators
+// Home Page Creators (must stay above /creators/:id)
 router.get('/creators/featured', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -327,7 +357,8 @@ router.get('/creators/featured', async (req, res) => {
     }
 });
 
-// Follower range of active creators, for the search page slider
+// Follower range of active creators, for the search page slider (must stay above /creators/:id)
+// GET http://localhost:3030/creators/follower-range  ->  { min: 150000, max: 820000 }
 router.get('/creators/follower-range', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -342,6 +373,8 @@ router.get('/creators/follower-range', async (req, res) => {
 });
 
 // Search creators (public): only Active creators
+// GET http://localhost:3030/creators/search?name=mint&category=Food&platform=TikTok&platform=YouTube&min_followers=100000&max_followers=1000000
+// Must stay above /creators/:id
 router.get('/creators/search', async (req, res) => {
     try {
         const name = (req.query.name || '').trim();
@@ -401,7 +434,7 @@ router.get('/creators/search', async (req, res) => {
     }
 });
 
-//One Creator
+// One Creator
 router.get('/creators/:id', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -496,7 +529,7 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
     }
 });
 
-//Delete Creators
+// Delete Creators
 router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const creatorId = req.params.id;
 
@@ -530,6 +563,219 @@ router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) =>
         await db.rollback();
         console.error(err);
         res.status(500).json({ error: true, message: 'Could not delete creator' });
+    }
+});
+
+// ------------------ TEAM (About Us page) ------------------
+//List Team
+const TEAM_FIELDS = `TeamMemberID, t_first_name, t_last_name, position, role, email,
+                     member_picture_link, social_link`;
+
+router.get('/team', async (req, res) => {
+    try {
+        const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member ORDER BY TeamMemberID`);
+        res.json({ error: false, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load team' });
+    }
+});
+
+router.get('/team/:id', async (req, res) => {
+    try {
+        const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member WHERE TeamMemberID = ?`, [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ error: true, message: 'Team member not found' });
+        res.json({ error: false, data: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load team member' });
+    }
+});
+
+// ------------------ ADMIN ACCOUNTS (admin only) ------------------
+// Admin accounts are rows in User_account with Role_ID = 1. Passwords are never sent back.
+const ADMIN_FIELDS = `UserID, username, email, first_name, last_name, Position, TeamMemberID, created_at`;
+
+// Records "superAdmin changed admin" in the Management table (one row per pair, time updated)
+const logManagement = (superAdminId, adminId) => db.query(
+    `INSERT INTO Management (superAdminID, AdminID, manage_timestamp) VALUES (?, ?, NOW())
+     ON DUPLICATE KEY UPDATE manage_timestamp = NOW()`,
+    [superAdminId, adminId]
+);
+
+// Reads and checks the admin form. passwordRequired = true when adding, false when editing.
+const readAdminForm = (body, passwordRequired) => {
+    const data = {
+        username: (body.username || '').trim(),
+        email: (body.email || '').trim(),
+        password: body.password || '',
+        first_name: (body.first_name || '').trim(),
+        last_name: (body.last_name || '').trim(),
+        Position: (body.Position || '').trim() || null,
+        TeamMemberID: (body.TeamMemberID || '').trim() || null,
+    };
+
+    if (!data.username || !data.email || !data.first_name || !data.last_name) {
+        return { error: 'Username, email, first name and last name are required' };
+    }
+    if (passwordRequired && !data.password) return { error: 'Password is required' };
+    if (data.password && data.password.length < 8) return { error: 'Password must be at least 8 characters' };
+
+    return { data };
+};
+
+// Turns MySQL errors into messages an admin can act on
+const adminDbError = (err) => {
+    if (err.code === 'ER_DUP_ENTRY') {
+        if (err.message.includes('uq_user_username')) return 'That username is already taken';
+        if (err.message.includes('uq_user_email')) return 'That email is already used';
+        if (err.message.includes('uq_user_team_member')) return 'That team member already has an account';
+    }
+    if (err.code === 'ER_NO_REFERENCED_ROW_2') return 'That team member does not exist';
+    return null;
+};
+
+// Search admin account
+router.get('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
+    try {
+        const name = (req.query.name || '').trim();
+        const email = (req.query.email || '').trim();
+        const position = (req.query.position || '').trim();
+
+        const conditions = ['Role_ID = ?'];
+        const params = [ROLE_ADMIN];
+
+        if (name) {
+            conditions.push("(first_name LIKE ? OR last_name LIKE ? OR username LIKE ?)");
+            params.push(`%${name}%`, `%${name}%`, `%${name}%`);
+        }
+        if (email) {
+            conditions.push('email LIKE ?');
+            params.push(`%${email}%`);
+        }
+        if (position) {
+            conditions.push('Position LIKE ?');
+            params.push(`%${position}%`);
+        }
+
+        const [rows] = await db.query(
+            `SELECT ${ADMIN_FIELDS} FROM User_account WHERE ${conditions.join(' AND ')} ORDER BY first_name`,
+            params
+        );
+        res.json({ error: false, count: rows.length, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load admins' });
+    }
+});
+
+// Find admin account
+router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT ${ADMIN_FIELDS} FROM User_account WHERE UserID = ? AND Role_ID = ?`,
+            [req.params.id, ROLE_ADMIN]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: true, message: 'Admin not found' });
+        res.json({ error: false, data: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load admin' });
+    }
+});
+
+// add admin account
+router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
+    const { data, error } = readAdminForm(req.body, true);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    const userId = 'U' + String(Date.now()).slice(-9);
+
+    try {
+        await db.beginTransaction();
+        await db.query(
+            `INSERT INTO User_account
+                (UserID, username, email, password, first_name, last_name, Position, Role_ID, TeamMemberID)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [userId, data.username, data.email, data.password, data.first_name, data.last_name,
+             data.Position, ROLE_ADMIN, data.TeamMemberID]
+        );
+        await logManagement(req.user.UserID, userId);
+        await db.commit();
+
+        console.log(`Admin ${userId} (${data.username}) created by ${req.user.username}`);
+        res.json({ error: false, message: 'Admin added', UserID: userId });
+    } catch (err) {
+        await db.rollback();
+        const msg = adminDbError(err);
+        if (msg) return res.status(409).json({ error: true, message: msg });
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not add admin' });
+    }
+});
+
+// Edit Admin
+router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    const adminId = req.params.id;
+    const { data, error } = readAdminForm(req.body, false);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    try {
+        const [found] = await db.query('SELECT UserID FROM User_account WHERE UserID = ? AND Role_ID = ?', [adminId, ROLE_ADMIN]);
+        if (found.length === 0) return res.status(404).json({ error: true, message: 'Admin not found' });
+
+        await db.beginTransaction();
+        await db.query(
+            `UPDATE User_account
+             SET username = ?, email = ?, first_name = ?, last_name = ?, Position = ?, TeamMemberID = ?
+             WHERE UserID = ?`,
+            [data.username, data.email, data.first_name, data.last_name, data.Position, data.TeamMemberID, adminId]
+        );
+        if (data.password) {
+            await db.query('UPDATE User_account SET password = ? WHERE UserID = ?', [data.password, adminId]);
+        }
+        await logManagement(req.user.UserID, adminId);
+        await db.commit();
+
+        console.log(`Admin ${adminId} updated by ${req.user.username}`);
+        res.json({ error: false, message: 'Admin updated' });
+    } catch (err) {
+        await db.rollback();
+        const msg = adminDbError(err);
+        if (msg) return res.status(409).json({ error: true, message: msg });
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not update admin' });
+    }
+});
+
+// Delete Admin
+router.delete('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    const adminId = req.params.id;
+
+    if (adminId === req.user.UserID) {
+        return res.status(400).json({ error: true, message: 'You cannot delete your own account' });
+    }
+
+    try {
+        const [found] = await db.query('SELECT username FROM User_account WHERE UserID = ? AND Role_ID = ?', [adminId, ROLE_ADMIN]);
+        if (found.length === 0) return res.status(404).json({ error: true, message: 'Admin not found' });
+
+        const [[{ admins }]] = await db.query('SELECT COUNT(*) AS admins FROM User_account WHERE Role_ID = ?', [ROLE_ADMIN]);
+        if (admins <= 1) return res.status(400).json({ error: true, message: 'Cannot delete the last admin' });
+
+        await db.beginTransaction();
+        // rows that point at this admin go first (Login_log is removed automatically by ON DELETE CASCADE)
+        await db.query('DELETE FROM Management WHERE superAdminID = ? OR AdminID = ?', [adminId, adminId]);
+        await db.query('DELETE FROM Edition WHERE AdminID = ?', [adminId]);
+        await db.query('DELETE FROM User_account WHERE UserID = ?', [adminId]);
+        await db.commit();
+
+        console.log(`Admin ${adminId} (${found[0].username}) deleted by ${req.user.username}`);
+        res.json({ error: false, message: 'Admin deleted' });
+    } catch (err) {
+        await db.rollback();
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not delete admin' });
     }
 });
 
