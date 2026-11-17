@@ -4,85 +4,122 @@
     <meta charset="UTF-8">
     <title>CreatorMatch - Search</title>
     <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        /* layout from the wireframe: Name / Category / Follower in one row */
+        .search-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .search-row label { display: block; font-weight: bold; margin-bottom: 6px; }
+        .search-row input, .search-row select { width: 100%; box-sizing: border-box; }
+        .search-actions {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 16px;
+        }
+        /* follower range: [min number] [one slider with two handles] [max number] */
+        .follower-range { display: flex; align-items: center; gap: 8px; }
+        .follower-range input[type="number"] { width: 90px; flex: none; }
+        .dual-slider { position: relative; flex: 1; height: 20px; }
+        .dual-slider::before {   /* the track line */
+            content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: #999;
+        }
+        .dual-slider input[type="range"] {
+            position: absolute; left: 0; top: 0; width: 100%; height: 20px; margin: 0;
+            padding: 0; border: 0; box-shadow: none; outline: none; background: transparent;
+            pointer-events: none; -webkit-appearance: none; appearance: none;
+        }
+        .dual-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
+        .dual-slider input[type="range"]::-moz-range-track { background: transparent; }
+        .dual-slider input[type="range"]::-webkit-slider-thumb {
+            pointer-events: auto; -webkit-appearance: none; width: 14px; height: 14px; margin-top: 3px;
+            border-radius: 50%; background: #fff; border: 2px solid #333; cursor: pointer;
+        }
+        .dual-slider input[type="range"]::-moz-range-thumb {
+            pointer-events: auto; width: 12px; height: 12px;
+            border-radius: 50%; background: #fff; border: 2px solid #333; cursor: pointer;
+        }
+        .checkbox-group { display: flex; gap: 24px; flex-wrap: wrap; }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .search-row, .result-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 <header>
     <nav>
-        <div class="logo">
-            <a href="/">CreatorMatch</a>
-        </div>
-        <div>
-            <a href="/">Home</a>
-            <a href="/search">Search Creator</a>
-            <a href="/team">Team</a>
-            <a href="/auth/login">Login</a>
-        </div>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
     </nav>
 </header>
 
 <main class="container">
-    <h1>Search Creator</h1>
-
     <section class="panel">
-        <form onsubmit="searchCreator(); return false;">
-            <label for="creatorName">Creator Name</label>
-            <input type="text" id="creatorName" placeholder="Enter creator name">
-
-            <label for="category">Category</label>
-            <select id="category">
-                <option>All</option>
-                <option>Food</option>
-                <option>Lifestyle</option>
-                <option>Fashion</option>
-                <option>Technology</option>
-            </select>
-
+        <form id="searchForm">
             <p><b>Platform</b></p>
             <div class="checkbox-group">
-                <label><input type="checkbox"> TikTok</label>
-                <label><input type="checkbox"> Instagram</label>
-                <label><input type="checkbox"> YouTube</label>
+                <label><input type="checkbox" name="platform" value="TikTok"> TikTok</label>
+                <label><input type="checkbox" name="platform" value="Instagram"> Instagram</label>
+                <label><input type="checkbox" name="platform" value="YouTube"> YouTube</label>
+                <label><input type="checkbox" name="platform" value="Facebook"> Facebook</label>
             </div>
 
-            <button class="button" type="submit">Search</button>
+            <div class="search-row">
+                <div>
+                    <label for="creatorName">Name</label>
+                    <input type="text" id="creatorName" placeholder="Creator name">
+                </div>
+
+                <div>
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">All</option>
+                        <option>Food</option>
+                        <option>Lifestyle</option>
+                        <option>Fashion</option>
+                        <option>Technology</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="minFollowers">Follower</label>
+                    <div class="follower-range">
+                        <input type="number" id="minFollowers" min="0" placeholder="0" aria-label="Minimum followers">
+                        <div class="dual-slider">
+                            <input type="range" id="minSlider" min="0" max="1000000" step="1000" value="0" aria-label="Minimum followers slider">
+                            <input type="range" id="maxSlider" min="0" max="1000000" step="1000" value="1000000" aria-label="Maximum followers slider">
+                        </div>
+                        <input type="number" id="maxFollowers" min="0" placeholder="No limit" aria-label="Maximum followers">
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-actions">
+                <button class="button button-clear" type="button" id="clearButton">Clear</button>
+                <button class="button" type="submit">Search</button>
+            </div>
         </form>
     </section>
 
-    <section>
-        <h2>Search Results</h2>
-
-        <div class="creator-list">
-            <article class="card creator-card" data-name="MintEats" data-category="Food">
-                <img src="https://placehold.co/300x300" alt="MintEats profile">
-                <h3>MintEats</h3>
-                <p>Food</p>
-                <p>820,000 followers</p>
-                <p class="small-text">TikTok / Instagram</p>
-                <a class="button" href="creator.html">View Detail</a>
-            </article>
-
-            <article class="card creator-card" data-name="Bebe" data-category="Lifestyle">
-                <img src="https://placehold.co/300x300" alt="Bebe profile">
-                <h3>Bebe</h3>
-                <p>Lifestyle</p>
-                <p>150,000 followers</p>
-                <p class="small-text">TikTok / Instagram</p>
-                <a class="button" href="creator.html">View Detail</a>
-            </article>
-
-            <article class="card creator-card" data-name="TechTom" data-category="Technology">
-                <img src="https://placehold.co/300x300" alt="TechTom profile">
-                <h3>TechTom</h3>
-                <p>Technology</p>
-                <p>320,000 followers</p>
-                <p class="small-text">YouTube / TikTok</p>
-                <a class="button" href="creator.html">View Detail</a>
-            </article>
+    <section class="panel">
+        <h2 id="resultTitle">Search Results</h2>
+        <div class="result-grid" id="results">
+            <p>Loading...</p>
         </div>
     </section>
 </main>
 
 <footer><p>CreatorMatch &copy; 2026</p></footer>
-<script src="script.js"></script>
+
+<script src="/js/nav.js"></script>
+<script src="/js/search.js"></script>
 </body>
 </html>

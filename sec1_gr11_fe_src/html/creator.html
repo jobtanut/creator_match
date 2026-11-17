@@ -7,31 +7,37 @@
 </head>
 <body>
 <header>
-
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
 </header>
 
 <main class="container">
-    <article class="creator-detail">
-        <img src="https://placehold.co/400x400" alt="MintEats profile">
+    <article class="creator-detail" id="creatorDetail">
+        <img id="creatorPicture" src="https://placehold.co/400x400" alt="">
 
         <section>
-            <h1>MintEats</h1>
-            <h3>Mintra Suksawat</h3>
-            <p><b>Category:</b> Food</p>
-            <p><b>Followers:</b> 820,000</p>
-            <p><b>Platforms:</b> TikTok, Instagram</p>
+            <h1 id="creatorName">Loading...</h1>
+            <h3 id="creatorRealName"></h3>
+            <p><b>Category:</b> <span id="creatorCategory"></span></p>
+            <p><b>Platforms:</b> <span id="creatorPlatforms"></span></p>
 
             <h3>About Creator</h3>
-            <p>
-                Food content creator who reviews restaurants and street food.
-                Suitable for food brands, restaurants, and lifestyle campaigns.
-            </p>
+            <p id="creatorDescription"></p>
 
-            <a class="button" href="search.html">Back to Search</a>
+            <a class="button" href="/">Back to Homepage</a>
+            <a class="button" href="/search">Back to Search</a>
         </section>
     </article>
 </main>
 
-<footer><p>CreatorMatch &copy; 2026</p></footer>
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script src="/js/creator.js"></script>
+</body>
 </body>
 </html>

@@ -1,13 +1,13 @@
-const express = require("express")
-const path = require("path")
-const router = express.Router()
+const express = require("express");
+const path = require("path");
+const router = express.Router();
 
-router.get('/login', (req,res) => {
-    res.sendFile(path.join(__dirname, '..', "html", "login.html"))
+router.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "html", "login.html"));
 });
 
-router.get('/signup', (req,res) => {
-    res.sendFile(path.join(__dirname, '..', "html", "signup.html"))
+router.get("/signup", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "html", "signup.html"));
 });
 
 module.exports = router;
