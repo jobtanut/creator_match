@@ -1,17 +1,20 @@
+/* CreatorMatch - External CSS */
+/* Based on basic CSS syntax: selector { property: value; } */
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    background-color: #FAFAF7;
+    background-color: #F6EDF1;
     color: #333333;
     font-family: Arial, sans-serif;
 }
 
 header {
     background-color: #FAFAF7;
-    border-bottom: 1px solid #E8D9B5;
+    border-bottom: 1px solid #FAF7F2;
 }
 
 nav {
@@ -25,7 +28,7 @@ nav {
 }
 
 .logo {
-    color: #9EC5E5;
+    color: #76658D;
     font-family: Georgia, serif;
     font-size: 25px;
     font-weight: bold;
@@ -34,13 +37,13 @@ nav {
 }
 
 nav a {
-    color: #333333;
+    color: #332F3A;
     margin-left: 20px;
     text-decoration: none;
 }
 
 nav a:hover {
-    color: #9EC5E5;
+    color: #9B6883;
     text-decoration: underline;
 }
 
@@ -57,7 +60,7 @@ main {
 .hero {
     padding: 90px 20px;
     text-align: center;
-    background-color: #F4EEDB;
+    background-color: #FAF7F2;
 }
 
 .hero h1 {
@@ -67,7 +70,7 @@ main {
 }
 
 .hero p {
-    color: #333333;
+    color: #332F3A;
     font-size: 18px;
 }
 
@@ -75,7 +78,7 @@ main {
     display: inline-block;
     margin-top: 10px;
     padding: 10px 22px;
-    background-color: #9EC5E5;
+    background-color: #9B6883;
     color: #333333;
     border: none;
     border-radius: 25px;
@@ -84,11 +87,11 @@ main {
 }
 
 .button:hover {
-    opacity: 0.85;
+    opacity: 0.5;
 }
 
 .secondary-button {
-    background-color: #C3D8CF;
+    background-color: #716A75;
 }
 
 .creator-list {
@@ -102,8 +105,8 @@ main {
 .card {
     width: 250px;
     padding: 20px;
-    background-color: #FAFAF7;
-    border: 1px solid #E8D9B5;
+    background-color: #FFFFFF;
+    border: 1px solid #FAF7F2;
     border-radius: 15px;
 }
 
@@ -120,14 +123,14 @@ main {
 }
 
 .small-text {
-    color: #333333;
+    color: #332F3A;
     font-size: 14px;
 }
 
 .panel {
     padding: 25px;
-    background-color: #FAFAF7;
-    border: 1px solid #E8D9B5;
+    background-color: #FFFFFF;
+    border: 1px solid #FAF7F2;
     border-radius: 15px;
     margin-bottom: 30px;
 }
@@ -142,9 +145,9 @@ label {
 input, select, textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #C3D8CF;
+    border: 1px solid #F6EDF1;
     border-radius: 7px;
-    background-color: #F4EEDB;
+    background-color: #FAF7F2;
 }
 
 .checkbox-group label {
@@ -162,7 +165,7 @@ input, select, textarea {
     gap: 30px;
     padding: 30px;
     background-color: #FAFAF7;
-    border: 1px solid #E8D9B5;
+    border: 1px solid #FAF7F2;
     border-radius: 15px;
 }
 
@@ -179,7 +182,7 @@ input, select, textarea {
     margin: 70px auto;
     padding: 30px;
     background-color: #FAFAF7;
-    border: 1px solid #E8D9B5;
+    border: 1px solid #FAF7F2;
     border-radius: 15px;
 }
 
@@ -194,7 +197,7 @@ input, select, textarea {
     padding: 25px;
     text-align: center;
     background-color: #FAFAF7;
-    border: 1px solid #E8D9B5;
+    border: 1px solid #FAF7F2;
     border-radius: 15px;
 }
 
@@ -206,12 +209,12 @@ table {
 
 th, td {
     padding: 12px;
-    border: 1px solid #E8D9B5;
+    border: 1px solid #FAF7F2;
     text-align: left;
 }
 
 th {
-    background-color: #9EC5E5;
+    background-color: #A76F8C;
     color: #333333;
 }
 
@@ -226,7 +229,7 @@ footer {
     margin-top: 50px;
     padding: 25px;
     text-align: center;
-    background-color: #C3D8CF;
+    background-color: #716A75;
     color: #333333;
 }
 
@@ -248,12 +251,4 @@ footer {
         width: 100%;
         height: auto;
     }
-}
-
-.drop-zone { display: block; }
-.drop-zone img { display: block; margin: 10px auto 0; }
-/* hides the file input but keeps it working (display:none can block the picker in some browsers) */
-.visually-hidden {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); border: 0;
 }
