@@ -101,6 +101,8 @@ main {
     gap: 20px;
 }
 
+.error { color: #d33; margin-top: 8px; }
+
 .card {
     width: 250px;
     padding: 20px;

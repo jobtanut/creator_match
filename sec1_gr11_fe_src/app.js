@@ -11,6 +11,8 @@ const teamRouter = require('./router/teamRouter')
 const authRouter = require('./router/authRouter')
 const adminRouter = require('./router/adminRouter')
 
+
+app.use("/", express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname,"assets")));
 

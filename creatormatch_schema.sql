@@ -149,3 +149,15 @@ CREATE TABLE Creator_Platform (
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='แพลตฟอร์มของครีเอเตอร์';
+
+DROP TABLE IF EXISTS `user_login`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_login` (
+  `Login_ID` int unsigned NOT NULL AUTO_INCREMENT,
+  `LoginDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `User_ID` int unsigned NOT NULL,
+  PRIMARY KEY (`Login_ID`),
+  KEY `fk_user_login` (`User_ID`),
+  CONSTRAINT `fk_user_login` FOREIGN KEY (`User_ID`) REFERENCES `user` (`User_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;  
