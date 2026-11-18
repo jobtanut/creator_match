@@ -6,10 +6,23 @@
     <link rel="stylesheet" href="/style/styles.css">
     <style>
         .admin-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
             gap: 20px;
         }
+
+        .admincard {
+            width: 50%;
+            text-align: center;
+            text-decoration: none;
+            color: black;
+            padding: 20px;
+            background-color: #FFFFFF;
+            border: 1px solid #FAF7F2;
+            border-radius: 15px;
+        }
+
     </style>
 </head>
 <body>
@@ -26,17 +39,15 @@
 
 <!-- Admin Menu -->
     <section class="admin-menu">
-        <article class="card">
+        <a class="admincard" href="/admin/search">
             <h2>Admin Manage</h2>
             <p>Search, add, edit and delete admin accounts.</p>
-            <a class="button" href="/admin/search">Open</a>
-        </article>
+        </a>
 
-        <article class="card">
+        <a class="admincard" href="/admin/creators">
             <h2>Creator Manage</h2>
             <p>Search, add, edit and delete creators.</p>
-            <a class="button" href="/admin/creators">Open</a>
-        </article>
+        </a>
     </section>
 </main>
 

@@ -1,5 +1,4 @@
 /* CreatorMatch - External CSS */
-/* Based on basic CSS syntax: selector { property: value; } */
 
 * {
     box-sizing: border-box;
@@ -116,6 +115,8 @@ main {
     background-color: #FFFFFF;
     border: 1px solid #FAF7F2;
     border-radius: 15px;
+    
+    text-align: center;
 }
 
 .card img {
@@ -209,13 +210,47 @@ input, select, textarea {
     gap: 20px;
 }
 
+.team-title,
+.team-intro {
+    text-align: center;
+}
+
+.team-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;   /* centres the bottom row of 2 */
+    gap: 24px;
+    max-width: 828px;          /* 3 cards (260px) + 2 gaps (24px) = 3 per row */
+    margin: 32px auto;
+}
+
 .team-card {
-    width: 250px;
+    width: 260px;
     padding: 25px;
     text-align: center;
     background-color: #FAFAF7;
     border: 1px solid #FAF7F2;
     border-radius: 15px;
+}
+
+.team-card img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.team-card h3 {
+    margin: 12px 0 4px;
+    font-family: Georgia, serif;
+}
+
+.team-card p {
+    margin: 4px 0;
+}
+
+.team-card a {
+    color: #9B6883;
 }
 
 table {

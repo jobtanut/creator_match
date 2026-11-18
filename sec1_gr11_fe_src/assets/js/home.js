@@ -22,7 +22,7 @@ async function loadFeatured() {
 
         list.innerHTML = data.data.map((c) => `
             <article class="card">
-                <img src="${escapeHtml(c.creator_picture_Link || 'https://placehold.co/300x300')}"
+                <img src="${escapeHtml(c.creator_picture_Link || "/pics/blank_profile.svg")}"
                      alt="${escapeHtml(c.creator_name)} profile">
                 <h3>${escapeHtml(c.creator_name)}</h3>
                 <p>${escapeHtml(c.category)} Creator</p>
