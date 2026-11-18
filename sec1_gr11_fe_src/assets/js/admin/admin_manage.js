@@ -1,8 +1,3 @@
-// admin_manage.js: Add / Edit Admin page.
-//   /admin/account                 -> add a new admin
-//   /admin/account?id=U000000002   -> edit (and delete) that admin
-// Needs nav.js and common.js loaded first.
-
 const form = document.getElementById('adminForm');
 const message = document.getElementById('formMessage');
 const teamSelect = document.getElementById('TeamMemberID');

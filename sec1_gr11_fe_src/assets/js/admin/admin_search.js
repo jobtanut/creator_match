@@ -1,7 +1,3 @@
-// admin_search.js: Admin Manage page, /admin/search (search + list + delete).
-// Adding and editing happen on their own page: /admin/account (add) and /admin/account?id=... (edit).
-// Needs nav.js and common.js loaded first.
-
 const rows = document.getElementById('adminRows');
 const listMessage = document.getElementById('listMessage');
 const searchForm = document.getElementById('adminSearchForm');

@@ -104,6 +104,7 @@ main {
 .creator-list {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
 }
 
@@ -271,10 +272,22 @@ th {
 }
 
 .action-button {
+    display: inline-block;
     padding: 6px 10px;
-    border: none;
+    border: 1px solid #9B6883;
     border-radius: 5px;
+    background-color: #FAFAF7;
+    color: #332F3A;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+    text-decoration: none;
     cursor: pointer;
+}
+
+.action-button:hover {
+    background-color: #9B6883;
+    color: #FFFFFF;
 }
 
 footer {

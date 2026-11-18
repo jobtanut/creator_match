@@ -1,6 +1,3 @@
-// common.js: shared helpers for the admin pages (creator_search, creator_manage, admin_search, admin_manage).
-// Load after nav.js (uses its getCookie) and before the page's own script.
-
 const API = 'http://localhost:3030';
 
 // Stops names like <script> from running as code when put into the page

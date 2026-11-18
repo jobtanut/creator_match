@@ -1,7 +1,3 @@
-// creator_search.js: Creator Manage page, /admin/creators (search + list + delete).
-// Adding and editing happen on their own page: /admin/creator (add) and /admin/creator?id=... (edit).
-// Needs nav.js and common.js loaded first.
-
 const rows = document.getElementById('creatorRows');
 const listMessage = document.getElementById('listMessage');
 const searchForm = document.getElementById('creatorSearchForm');

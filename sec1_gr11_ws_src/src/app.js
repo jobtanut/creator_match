@@ -399,7 +399,7 @@ router.get('/creators/featured', async (req, res) => {
              WHERE c.Status = 'Active'
              GROUP BY c.creatorID
              ORDER BY RAND()
-             LIMIT 6`
+             LIMIT 8`
         );
         res.json({ error: false, data: rows });
     } catch (err) {
