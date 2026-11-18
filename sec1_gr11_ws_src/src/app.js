@@ -172,6 +172,12 @@ const requireAdmin = (req, res, next) => {
 //     password: admin1234
 // expected: 302 redirect to http://localhost:8081/admin, cookie "token" is set,
 //         new 'Success' row in Login_log
+
+//
+
+//test1 not pass the preview page not showing
+
+
 // Test 2 (wrong password):
 // method: POST
 // URL: http://localhost:3030/login
@@ -179,6 +185,10 @@ const requireAdmin = (req, res, next) => {
 //     username: admin
 //     password: wrongpass
 // expected: 401, login page HTML with "Incorrect username or password"
+
+
+//test2 pass
+
 
 // login
 router.post('/login', loginAuth, (req, res) => {
@@ -227,6 +237,11 @@ router.post('/login', loginAuth, (req, res) => {
 //     password: pakorn123
 //     confirm_password: pakorn123
 //   expected: 302 redirect to http://localhost:8081/auth/login
+
+
+//test1 pass
+
+
 // Test 2 (username already taken):
 //   method: POST
 //   URL: http://localhost:3030/signup
@@ -238,6 +253,8 @@ router.post('/login', loginAuth, (req, res) => {
 //     password: password123
 //     confirm_password: password123
 //   expected: 409, sign up page HTML with "Username is already taken"
+
+//test2 
 // Sign up
 router.post('/signup', (req, res) => {
     const {first_name, last_name, email, username, password, confirm_password} = req.body;
