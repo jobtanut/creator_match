@@ -312,3 +312,111 @@ footer {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); border: 0;
 }
+
+/* ---------- Trends page ---------- */
+.trend-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0 10px;
+}
+
+.filter-button {
+    padding: 8px 16px;
+    background-color: #FAFAF7;
+    color: #332F3A;
+    border: 1px solid #9B6883;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.filter-button.active {
+    background-color: #9B6883;
+    color: #FFFFFF;
+}
+
+.trend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 200px;
+    grid-auto-flow: dense;      /* fills gaps so the mosaic has no holes */
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.trend-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    overflow: hidden;
+    color: #FFFFFF;
+    text-decoration: none;
+    background-color: var(--tint);
+    background-size: cover;
+    background-position: center;
+}
+
+/* colour wash over the photo, like the reference */
+.trend-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--tint);
+    opacity: 0.75;
+    transition: opacity 0.2s;
+}
+
+.trend-tile:hover::before {
+    opacity: 0.55;
+}
+
+.trend-tag,
+.trend-text {
+    position: relative;     /* sits above the colour wash */
+}
+
+.trend-tag {
+    align-self: flex-start;
+    padding: 4px 10px;
+    border: 1px solid #FFFFFF;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.trend-text h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.trend-text p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.tile-big {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.tile-big h3 {
+    font-size: 28px;
+}
+
+.tile-wide {
+    grid-column: span 2;
+}
+
+@media screen and (max-width: 700px) {
+    .trend-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

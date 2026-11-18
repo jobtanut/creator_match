@@ -32,7 +32,8 @@ function buildNav() {
 
     let links = `
     <a href="/search">Search</a>
-    <a href="/team">About Us</a>`;
+    <a href="/team">About Us</a>
+    <a href="/trends">Trends</a>`;
 
     if (!user) {
         links += `
