@@ -33,7 +33,6 @@
 <main class="container">
     <p><a href="/admin/creators">Back to Creator Manage</a></p>
 
-    <!-- One page for both: /admin/creator = add, /admin/creator?id=C000000001 = edit -->
     <section class="panel">
         <h1 id="formTitle">Add Creator</h1>
 
@@ -71,8 +70,6 @@
             </select>
 
             <p><b>Picture</b></p>
-            <!-- the box is a <label> for the file input, so clicking it opens the file picker
-                 without any JavaScript. Dropping a file onto it is handled in creator-form.js -->
             <label class="drop-zone" id="dropZone" for="picture">
                 <span id="dropText">Drag and drop a picture here, or click to choose</span>
                 <img id="dropPreview" alt="" hidden>

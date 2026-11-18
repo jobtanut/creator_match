@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "menu.html"))
 });
 
-// Add / edit one creator (/admin/creator or /admin/creator?id=...)
+// Add / edit one creator
 router.get('/account', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_manage.html"))
 });
@@ -17,7 +17,7 @@ router.get('/search', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_search.html"))
 });
 
-// Add / edit one admin (/admin/account or /admin/account?id=...)
+// Add / edit one admin
 router.get('/creators', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "creator_search.html"))
 });
