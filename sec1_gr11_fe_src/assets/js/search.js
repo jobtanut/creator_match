@@ -9,8 +9,6 @@ const maxInput = document.getElementById('maxFollowers');
 const minSlider = document.getElementById('minSlider');
 const maxSlider = document.getElementById('maxSlider');
 
-// The slider runs from the lowest to the highest follower count in the database.
-// These are filled in by loadFollowerRange() when the page opens.
 let SLIDER_MIN = 0;
 let SLIDER_MAX = 1000000;
 
@@ -20,10 +18,10 @@ function escapeHtml(text) {
     }[ch]));
 }
 
-// ------------------ FOLLOWER RANGE ------------------
-// Boxes and slider always show the same range. Empty Min = no minimum, empty Max = no limit.
+// Follower Range
+// Boxes and slider always show the same range.
 
-// Asks the backend for the lowest and highest follower counts and sizes the slider to match
+// Asks the backend for the lowest and highest follower counts
 async function loadFollowerRange() {
     try {
         const res = await fetch(`${API}/creators/follower-range`);
@@ -31,7 +29,7 @@ async function loadFollowerRange() {
         if (data.error) throw new Error(data.message);
 
         SLIDER_MIN = data.min;
-        SLIDER_MAX = Math.max(data.max, data.min + 1);   // a slider needs at least 2 positions
+        SLIDER_MAX = Math.max(data.max, data.min + 1);
     } catch (err) {
         // keep the default 0 - 1,000,000 if the range can't be loaded
     }
@@ -64,7 +62,7 @@ maxSlider.addEventListener('input', () => {
     maxInput.value = Number(maxSlider.value) >= SLIDER_MAX ? '' : maxSlider.value;
 });
 
-// typing in a box moves the matching handle (numbers outside the data range park it at that end)
+// typing in a box moves the matching handle
 const clamp = (n) => Math.min(Math.max(n, SLIDER_MIN), SLIDER_MAX);
 
 function syncSlidersFromInputs() {
@@ -77,7 +75,7 @@ maxInput.addEventListener('input', syncSlidersFromInputs);
 
 // ------------------ SEARCH ------------------
 
-// Read the form into ?name=...&category=...&platform=...&min_followers=...&max_followers=...
+// Read the form
 function buildQuery() {
     const params = new URLSearchParams();
 
@@ -95,7 +93,7 @@ function buildQuery() {
     return params;
 }
 
-// Put values from the page URL back into the form (used for the home page search bar)
+// Put values from the page URL back into the form
 function fillFormFromUrl() {
     const params = new URLSearchParams(window.location.search);
 
@@ -121,7 +119,7 @@ async function searchCreators() {
     const params = buildQuery();
     results.innerHTML = '<p>Searching...</p>';
 
-    // keep the filters in the address bar, so refresh and Back keep the same results
+    // keep the filters in the address bar
     history.replaceState(null, '', `/search${params.toString() ? '?' + params : ''}`);
 
     try {
@@ -163,7 +161,7 @@ document.getElementById('clearButton').addEventListener('click', () => {
     searchCreators();
 });
 
-// size the slider from the database first, then apply any filters from the URL and search
+// size the slider from the database first
 loadFollowerRange().then(() => {
     fillFormFromUrl();
     searchCreators();

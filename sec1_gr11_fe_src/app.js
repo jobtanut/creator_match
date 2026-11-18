@@ -13,7 +13,6 @@ const adminRouter = require('./router/adminRouter');
 const creatorRouter = require('./router/creatorRouter');
 const trendsRouter =require('./router/trendsRouter');
 
-
 app.use("/", express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname,"assets")));

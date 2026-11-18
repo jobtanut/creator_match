@@ -33,11 +33,11 @@ async function loadCreatorForEdit() {
     }
 }
 
-// ------------------ SAVE (add or update) ------------------
+// save (add or update)
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const body = new FormData(form);   // includes the picture file if one was chosen
+    const body = new FormData(form);
 
     try {
         if (editingId) {
@@ -52,7 +52,7 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// ------------------ DELETE (edit mode only) ------------------
+// delete
 document.getElementById('deleteButton').addEventListener('click', async () => {
     if (!confirm(`Delete ${form.creator_name.value}? This removes the creator, their platforms and edit history, and cannot be undone.`)) return;
 
@@ -64,7 +64,7 @@ document.getElementById('deleteButton').addEventListener('click', async () => {
     }
 });
 
-// ------------------ DRAG AND DROP PICTURE ------------------
+// drag drop picture
 const dropZone = document.getElementById('dropZone');
 const dropText = document.getElementById('dropText');
 const dropPreview = document.getElementById('dropPreview');
@@ -73,14 +73,14 @@ const pictureInput = form.picture;
 const isImageFile = (file) =>
     file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name);
 
-// Shows the chosen file's name, and a preview if the browser can display it (HEIC can't be previewed)
+// Shows the chosen file's name, and a preview if the browser can display it
 function showChosenFile() {
     const file = pictureInput.files[0];
     if (!file) return;
 
     dropText.textContent = `${file.name} (click or drop another to replace)`;
     if (/\.(heic|heif)$/i.test(file.name)) {
-        dropPreview.hidden = true;   // converted to JPG on the server after upload
+        dropPreview.hidden = true;
     } else {
         dropPreview.src = URL.createObjectURL(file);
         dropPreview.hidden = false;
@@ -100,7 +100,7 @@ pictureInput.addEventListener('change', showChosenFile);
     dropZone.classList.remove('dragging');
 }));
 
-// dropping a file puts it into the hidden file input, so FormData sends it like a normal pick
+// dropping a file puts it into the hidden file input
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
