@@ -15,7 +15,7 @@ function searchQuery() {
     return params;
 }
 
-// ------------------ SEARCH / LIST ------------------
+// Search / list
 async function loadCreators() {
     try {
         const data = await api('GET', `/creators?${searchQuery()}`);
@@ -59,7 +59,7 @@ document.getElementById('searchClear').addEventListener('click', () => {
     loadCreators();
 });
 
-// ------------------ DELETE ------------------
+// Delete
 async function deleteCreator(id) {
     const c = creators.find((x) => x.creatorID === id);
     if (!confirm(`Delete ${c ? c.creator_name : id}? This removes the creator, their platforms and edit history, and cannot be undone.`)) return;
@@ -73,5 +73,5 @@ async function deleteCreator(id) {
     }
 }
 
-showFlashMessage(listMessage);   // "Creator added" / "Creator updated" after coming back from the form
+showFlashMessage(listMessage);
 loadCreators();

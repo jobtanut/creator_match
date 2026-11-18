@@ -6,7 +6,7 @@ function escapeHtml(text) {
     }[ch]));
 }
 
-// Only allow real web links, so a bad value in the database can't become a javascript: link
+// Only allow real web links
 const safeUrl = (url) => (/^https?:\/\//i.test(url || '') ? url : '');
 
 async function loadTeam() {

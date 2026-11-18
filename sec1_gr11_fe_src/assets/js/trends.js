@@ -2,7 +2,7 @@ const API = 'http://localhost:3030';
 const CACHE_KEY = 'trends-cache';
 const CACHE_MINUTES = 30;
 
-// category -> label shown on the tile + tile colour
+// category
 const CATEGORIES = [
     { id: 'general',       label: 'Top Stories',   color: '#716A75' },
     { id: 'entertainment', label: 'Entertainment', color: '#9B6883' },
@@ -22,7 +22,7 @@ function escapeHtml(text) {
 
 const safeUrl = (url) => (/^https?:\/\//i.test(url || '') ? url : '');
 
-// Asks our web service for one category (the WS calls NewsAPI)
+// Asks  web service for one category
 async function fetchCategory(category) {
     const res = await fetch(`${API}/trends?category=${category.id}`);
     const data = await res.json();
@@ -34,14 +34,14 @@ function readCache() {
     try {
         const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
         if (cached && Date.now() - cached.time < CACHE_MINUTES * 60 * 1000) return cached.articles;
-    } catch (err) { /* no cache or storage blocked */ }
+    } catch (err) {}
     return null;
 }
 
 function writeCache(articles) {
     try {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), articles }));
-    } catch (err) { /* storage blocked, just skip caching */ }
+    } catch (err) {}
 }
 
 function timeAgo(dateText) {
@@ -114,14 +114,14 @@ async function loadTrends() {
             status.textContent = `Loading ${category.label}...`;
             const articles = await fetchCategory(category);
 
-            // the same story can appear under two categories, keep it once
+            // only keep a story once
             articles.forEach((a) => {
                 if (!seen.has(a.url)) {
                     seen.add(a.url);
                     allArticles.push(a);
                 }
             });
-            renderTiles();                 // show tiles as each category arrives
+            renderTiles();
         }
         status.textContent = '';
         writeCache(allArticles);

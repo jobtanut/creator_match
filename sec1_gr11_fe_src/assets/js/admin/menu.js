@@ -1,4 +1,4 @@
-requireAdmin();   // anyone who isn't an admin goes to the login page
+requireAdmin();
 
 // greet the logged-in admin by username
 const me = getUser();

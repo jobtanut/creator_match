@@ -1,4 +1,3 @@
-// home.js: loads 6 featured creators into the home page
 const API = 'http://localhost:3030';
 
 function escapeHtml(text) {
