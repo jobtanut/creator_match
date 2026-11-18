@@ -47,7 +47,7 @@ function renderTable() {
             <td>${escapeHtml(c.platforms || '-')}</td>
             <td>${escapeHtml(c.Status)}</td>
             <td>
-                <a class="action-button" href="/admin/creator?id=${encodeURIComponent(c.creatorID)}">Edit</a>
+                <a class="action-button" href="/admin/creatormanage?id=${encodeURIComponent(c.creatorID)}">Edit</a>
                 <button class="action-button" onclick="deleteCreator('${c.creatorID}')">Delete</button>
             </td>
         </tr>`).join('');

@@ -23,7 +23,7 @@ router.get('/creators', (req, res) => {
 });
 
 // Creator Manage: search + list
-router.get('/creatorm', (req, res) => {
+router.get('/creatormanage', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "creator_manage.html"))
 });
 
