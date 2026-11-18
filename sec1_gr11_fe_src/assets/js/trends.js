@@ -1,6 +1,6 @@
 const API = 'http://localhost:3030';
 const CACHE_KEY = 'trends-cache';
-const CACHE_MINUTES = 30;      // reuse results for 30 min so refreshing doesn't call the API again
+const CACHE_MINUTES = 30;
 
 // category -> label shown on the tile + tile colour
 const CATEGORIES = [
