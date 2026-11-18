@@ -1,4 +1,3 @@
-// team.js: About Us page. Loads every team member from the web service (GET /team).
 const API = 'http://localhost:3030';
 
 function escapeHtml(text) {

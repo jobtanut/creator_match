@@ -1,4 +1,3 @@
-// creator.js: fills creator.html with one creator, using the ?id= in the URL
 const API = 'http://localhost:3030';
 
 async function loadCreator() {
