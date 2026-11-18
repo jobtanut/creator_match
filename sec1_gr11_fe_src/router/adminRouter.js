@@ -4,7 +4,7 @@ const router = express.Router()
 
 // Admin menu (first page after an admin logs in)
 router.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', "html", "admin", "menu.html"))
+    res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_menu.html"))
 });
 
 // Add / edit one creator

@@ -162,6 +162,24 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
+
+// Login (admins and regular users)
+// Test 1 (admin, correct password):
+// method: POST
+// URL: http://localhost:3030/login
+// body: x-www-form-urlencoded
+//     username: admin
+//     password: admin1234
+// expected: 302 redirect to http://localhost:8081/admin, cookie "token" is set,
+//         new 'Success' row in Login_log
+// Test 2 (wrong password):
+// method: POST
+// URL: http://localhost:3030/login
+// body: x-www-form-urlencoded
+//     username: admin
+//     password: wrongpass
+// expected: 401, login page HTML with "Incorrect username or password"
+
 // login
 router.post('/login', loginAuth, (req, res) => {
     const payload = {
@@ -197,6 +215,29 @@ router.post('/login', loginAuth, (req, res) => {
     res.redirect(`${FE_URL}/`);
 });
 
+// Testing Sign up
+// Test 1 (new user):
+//   method: POST
+//   URL: http://localhost:3030/signup
+//   body: x-www-form-urlencoded
+//     first_name: Pakorn
+//     last_name: Srisawat
+//     email: pakorn@example.com
+//     username: pakorn
+//     password: pakorn123
+//     confirm_password: pakorn123
+//   expected: 302 redirect to http://localhost:8081/auth/login
+// Test 2 (username already taken):
+//   method: POST
+//   URL: http://localhost:3030/signup
+//   body: x-www-form-urlencoded
+//     first_name: Test
+//     last_name: Duplicate
+//     email: someone-new@example.com
+//     username: user1
+//     password: password123
+//     confirm_password: password123
+//   expected: 409, sign up page HTML with "Username is already taken"
 // Sign up
 router.post('/signup', (req, res) => {
     const {first_name, last_name, email, username, password, confirm_password} = req.body;
@@ -281,16 +322,16 @@ const savePlatforms = async (creatorId, platforms) => {
     }
 };
 
-/*
-  List / search creators (admin page): shows Active AND Inactive creators.
-  No filters = every creator. Filters can be combined.
-  Test 1 (all creators):
-    method: GET
-    URL: http://localhost:3030/creators
-  Test 2 (search with criteria):
-    method: GET
-    URL: http://localhost:3030/creators?name=mint&category=Food&status=Active&platform=TikTok
-*/
+// Testing Search for creators
+// Test 1 (no criteria = every creator):
+//   method: GET
+//   URL: http://localhost:3030/creators
+//   expected: 200, { "error": false, "count": 14, "data": [ ... ] }
+// Test 2 (search with criteria):
+//   method: GET
+//   URL: http://localhost:3030/creators?category=Lifestyle&status=Inactive&platform=YouTube
+//   expected: 200, one result: MintFitLife
+
 router.get('/creators', async (req, res) => {
     try {
         const name = (req.query.name || '').trim();
@@ -337,6 +378,16 @@ router.get('/creators', async (req, res) => {
     }
 });
 
+// Testing Featured creators for the home page (6 random Active creators)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/creators/featured
+//   expected: 200, "data" has 6 creators, all with Status Active
+// Test 2 (send again):
+//   method: GET
+//   URL: http://localhost:3030/creators/featured
+//   expected: 200, 6 creators in a different random order / selection
+
 // Home Page Creators (must stay above /creators/:id)
 router.get('/creators/featured', async (req, res) => {
     try {
@@ -357,8 +408,19 @@ router.get('/creators/featured', async (req, res) => {
     }
 });
 
+
+// Testing Lowest and highest follower counts of Active creators (search page slider)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/creators/follower-range
+//   expected: 200, { "error": false, "min": 0, "max": 1200000 }
+// Test 2 (after deactivating the biggest creator):
+//   first edit FahDaily (C000000103) to Status Inactive with PUT /creators/C000000103, then
+//   method: GET
+//   URL: http://localhost:3030/creators/follower-range
+//   expected: 200, "max" drops to 880000
+
 // Follower range of active creators, for the search page slider (must stay above /creators/:id)
-// GET http://localhost:3030/creators/follower-range  ->  { min: 150000, max: 820000 }
 router.get('/creators/follower-range', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -372,9 +434,21 @@ router.get('/creators/follower-range', async (req, res) => {
     }
 });
 
+// Testing Advanced search (public)
+// Test 1 (name + category + platform):
+//   method: GET
+//   URL: http://localhost:3030/creators/search?name=eats&category=Food&platform=TikTok
+//   expected: 200, one result: PloyEats
+// Test 2 (follower range + two platforms):
+//   method: GET
+//   URL: http://localhost:3030/creators/search?platform=Facebook&platform=YouTube&min_followers=100000&max_followers=900000
+//   expected: 200, three results: BankFits, JayDessert, TechTom
+// Test 3 (bad range):
+//   method: GET
+//   URL: http://localhost:3030/creators/search?min_followers=500000&max_followers=100000
+//   expected: 400, "Minimum followers cannot be more than maximum"
+
 // Search creators (public): only Active creators
-// GET http://localhost:3030/creators/search?name=mint&category=Food&platform=TikTok&platform=YouTube&min_followers=100000&max_followers=1000000
-// Must stay above /creators/:id
 router.get('/creators/search', async (req, res) => {
     try {
         const name = (req.query.name || '').trim();
@@ -434,7 +508,17 @@ router.get('/creators/search', async (req, res) => {
     }
 });
 
-// One Creator
+// Testing Search One creator (public)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/creators/C000000101
+//   expected: 200, PloyEats with platforms "Instagram, TikTok"
+// Test 2 (does not exist):
+//   method: GET
+//   URL: http://localhost:3030/creators/C999999999
+//   expected: 404, { "error": true, "message": "Creator not found" }
+
+// Search One Creator
 router.get('/creators/:id', async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -455,6 +539,34 @@ router.get('/creators/:id', async (req, res) => {
         res.status(500).json({ error: true, message: 'Could not load creator' });
     }
 });
+
+
+// Testing Add creator (admin only)
+// Test 1 (with picture):
+//   method: POST
+//   URL: http://localhost:3030/creators
+//   header: Authorization: <admin token>
+//   body: form-data
+//     creator_name: CafeHopperTH
+//     category: Lifestyle
+//     c_first_name: Nam
+//     c_last_name: Prasertsuk
+//     followers: 75000
+//     platforms: Instagram, TikTok
+//     Description: Cafe reviews around Bangkok
+//     Status: Active
+//     picture: (type File) choose a .jpg / .png / .heic
+//   expected: 200, { "error": false, "message": "Creator added", "creatorID": "C..." }
+// Test 2 (no token):
+//   method: POST
+//   URL: http://localhost:3030/creators
+//   body: form-data
+//     creator_name: NoTokenTest
+//     category: Food
+//   expected: 401 Unauthorized
+// Test 3 (logged in as a regular user, token from user1 / user1pass):
+//   same as Test 1 with header Authorization: <user1 token>
+//   expected: 403, "Admins only"
 
 // Add Creators
 router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'), fixHeic, async (req, res) => {
@@ -487,6 +599,30 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
     }
 });
 
+// Testing Edit creator (admin only). Picture is only replaced if a new file is sent.
+// Test 1 (change followers and status):
+//   method: PUT
+//   URL: http://localhost:3030/creators/C000000107
+//   header: Authorization: <admin token>
+//   body: form-data
+//     creator_name: TechTom
+//     category: Technology
+//     c_first_name: Tom
+//     c_last_name: Kittipong
+//     followers: 350000
+//     platforms: YouTube, Facebook
+//     Description: Gadget reviews and phone comparisons in Thai
+//     Status: Inactive
+//   expected: 200, "Creator updated"
+// Test 2 (invalid followers):
+//   method: PUT
+//   URL: http://localhost:3030/creators/C000000107
+//   header: Authorization: <admin token>
+//   body: form-data
+//     creator_name: TechTom
+//     category: Technology
+//     followers: -10
+//   expected: 400, "Followers must be a whole number, 0 or more"
 
 //Edit Creators
 router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture'), fixHeic, async (req, res) => {
@@ -529,6 +665,18 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
     }
 });
 
+// Testing Delete creator (admin only)
+// Test 1:
+//   method: DELETE
+//   URL: http://localhost:3030/creators/C000000104
+//   header: Authorization: <admin token>
+//   expected: 200, "Creator deleted"
+// Test 2 (already deleted / does not exist):
+//   method: DELETE
+//   URL: http://localhost:3030/creators/C000000104
+//   header: Authorization: <admin token>
+//   expected: 404, "Creator not found"
+
 // Delete Creators
 router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const creatorId = req.params.id;
@@ -566,7 +714,19 @@ router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) =>
     }
 });
 
+
 // ------------------ TEAM (About Us page) ------------------
+// Testing Team members (public)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/team
+//   expected: 200, 5 team members
+// Test 2 (check the fields):
+//   method: GET
+//   URL: http://localhost:3030/team
+//   expected: every item has t_first_name, t_last_name, position, email,
+//             member_picture_link and social_link
+
 //List Team
 const TEAM_FIELDS = `TeamMemberID, t_first_name, t_last_name, position, role, email,
                      member_picture_link, social_link`;
@@ -581,6 +741,15 @@ router.get('/team', async (req, res) => {
     }
 });
 
+// Testing One team member (public)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/team/T000000001
+//   expected: 200, Tanut Noumanong with social_link https://github.com/jobtanut
+// Test 2 (does not exist):
+//   method: GET
+//   URL: http://localhost:3030/team/T999999999
+//   expected: 404, "Team member not found"
 router.get('/team/:id', async (req, res) => {
     try {
         const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member WHERE TeamMemberID = ?`, [req.params.id]);
@@ -593,6 +762,7 @@ router.get('/team/:id', async (req, res) => {
 });
 
 // ------------------ ADMIN ACCOUNTS (admin only) ------------------
+ 
 // Admin accounts are rows in User_account with Role_ID = 1. Passwords are never sent back.
 const ADMIN_FIELDS = `UserID, username, email, first_name, last_name, Position, TeamMemberID, created_at`;
 
@@ -635,6 +805,18 @@ const adminDbError = (err) => {
     return null;
 };
 
+// Testing Search / list admin accounts (admin only). No criteria = every admin.
+// Test 1 (all admins):
+//   method: GET
+//   URL: http://localhost:3030/admins
+//   header: Authorization: <admin token>
+//   expected: 200, "count": 3, no password field in any result
+// Test 2 (search with criteria):
+//   method: GET
+//   URL: http://localhost:3030/admins?name=tanut&email=creatormatch&position=Developer
+//   header: Authorization: <admin token>
+//   expected: 200, one result: admin (Tanut Noumanong)
+
 // Search admin account
 router.get('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
     try {
@@ -669,6 +851,18 @@ router.get('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
     }
 });
 
+// Testing View one admin account (admin only)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/admins/U000000002
+//   header: Authorization: <admin token>
+//   expected: 200, benya (Benya Shinno)
+// Test 2 (a regular user's ID is not an admin):
+//   method: GET
+//   URL: http://localhost:3030/admins/U000000101
+//   header: Authorization: <admin token>
+//   expected: 404, "Admin not found"
+
 // Find admin account
 router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     try {
@@ -684,6 +878,36 @@ router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     }
 });
 
+// Testing Add admin account (admin only)
+// Test 1 (linked to a team member):
+//   method: POST
+//   URL: http://localhost:3030/admins
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "monthisa",
+//     "email": "monthisa.admin@creatormatch.com",
+//     "password": "monthisa123",
+//     "first_name": "Monthisa",
+//     "last_name": "Member",
+//     "Position": "Team Member",
+//     "TeamMemberID": "T000000004"
+//   }
+//   expected: 200, "Admin added"
+// Test 2 (password too short):
+//   method: POST
+//   URL: http://localhost:3030/admins
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "shortpw",
+//     "email": "shortpw@creatormatch.com",
+//     "password": "123",
+//     "first_name": "Short",
+//     "last_name": "Password"
+//   }
+//   expected: 400, "Password must be at least 8 characters"
+ 
 // add admin account
 router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
     const { data, error } = readAdminForm(req.body, true);
@@ -714,6 +938,33 @@ router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
     }
 });
 
+// Testing Edit admin account (admin only). Leave "password" out to keep the current one.
+// Test 1 (change position, keep password):
+//   method: PUT
+//   URL: http://localhost:3030/admins/U000000003
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "naphat",
+//     "email": "naphat.admin@creatormatch.com",
+//     "first_name": "Naphat",
+//     "last_name": "Member",
+//     "Position": "Project Manager"
+//   }
+//   expected: 200, "Admin updated"
+// Test 2 (username already used by another admin):
+//   method: PUT
+//   URL: http://localhost:3030/admins/U000000003
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "benya",
+//     "email": "naphat.admin@creatormatch.com",
+//     "first_name": "Naphat",
+//     "last_name": "Member"
+//   }
+//   expected: 409, "That username is already taken"
+ 
 // Edit Admin
 router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const adminId = req.params.id;
@@ -748,6 +999,18 @@ router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     }
 });
 
+// Testing delete admin account (admin only). Cannot delete yourself or the last admin.
+// Test 1:
+//   method: DELETE
+//   URL: http://localhost:3030/admins/U000000003
+//   header: Authorization: <admin token>
+//   expected: 200, "Admin deleted"
+// Test 2 (deleting your own account, logged in as admin = U000000001):
+//   method: DELETE
+//   URL: http://localhost:3030/admins/U000000001
+//   header: Authorization: <admin token>
+//   expected: 400, "You cannot delete your own account"
+ 
 // Delete Admin
 router.delete('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const adminId = req.params.id;
