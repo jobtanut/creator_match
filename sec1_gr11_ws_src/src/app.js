@@ -728,18 +728,18 @@ router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) =>
 //             member_picture_link and social_link
 
 //List Team
-const TEAM_FIELDS = `TeamMemberID, t_first_name, t_last_name, position, role, email,
-                     member_picture_link, social_link`;
+// const TEAM_FIELDS = `TeamMemberID, t_first_name, t_last_name, position, role, email,
+//                      member_picture_link, social_link`;
 
-router.get('/team', async (req, res) => {
-    try {
-        const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member ORDER BY TeamMemberID`);
-        res.json({ error: false, data: rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: true, message: 'Could not load team' });
-    }
-});
+// router.get('/team', async (req, res) => {
+//     try {
+//         const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member ORDER BY TeamMemberID`);
+//         res.json({ error: false, data: rows });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: true, message: 'Could not load team' });
+//     }
+// });
 
 // Testing One team member (public)
 // Test 1:
@@ -1049,6 +1049,91 @@ app.use((err, req, res, next) => {
     res.status(400).json({ error: true, message: err.message });
 });
 
+// ------------------ Trends ------------------
+// Results are kept for 30 minutes per category, to save the free 100 requests/day.
+
+const NEWS_URL = 'https://newsapi.org/v2/top-headlines';
+const NEWS_CATEGORIES = ['general', 'entertainment', 'sports', 'technology', 'business'];
+const NEWS_CACHE_MS = 30 * 60 * 1000;
+const newsCache = {};   
+
+// One request to NewsAPI for one category and country
+const getHeadlines = async (category, country) => {
+    const params = new URLSearchParams({
+        category, country, pageSize: 4, apiKey: process.env.NEWS_API_KEY,
+    });
+    const response = await fetch(`${NEWS_URL}?${params}`, {
+        headers: { 'User-Agent': 'CreatorMatch/1.0' },   // NewsAPI rejects server requests without one
+    });
+    const data = await response.json();
+
+    if (data.status === 'error') {
+        const err = new Error(data.message);
+        err.code = data.code;
+        throw err;
+    }
+    // NewsAPI sometimes returns deleted articles titled "[Removed]", skip them
+    return data.articles.filter((a) => a.title && a.title !== '[Removed]');
+};
+
+// Testing Trending news (public)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/trends?category=sports
+//   expected: 200, { "error": false, "category": "sports", "country": "th" (or "us"), "data": [ ... ] },
+//             every item has title, url, image, source and publishedAt
+// Test 2 (category that does not exist):
+//   method: GET
+//   URL: http://localhost:3030/trends?category=food
+//   expected: 400, "Category must be one of: general, entertainment, sports, technology, business"
+
+router.get('/trends', async (req, res) => {
+    const category = (req.query.category || 'general').trim();
+    if (!NEWS_CATEGORIES.includes(category)) {
+        return res.status(400).json({ error: true, message: 'Category must be one of: ' + NEWS_CATEGORIES.join(', ') });
+    }
+
+    const cached = newsCache[category];
+    if (cached && Date.now() - cached.time < NEWS_CACHE_MS) {
+        return res.json({ error: false, cached: true, ...cached.body });
+    }
+
+    try {
+        // Thailand first; if that category is empty, fall back to US headlines
+        let country = 'th';
+        let articles = await getHeadlines(category, country);
+        if (articles.length === 0) {
+            country = 'us';
+            articles = await getHeadlines(category, country);
+        }
+
+        const body = {
+            category,
+            country,
+            count: articles.length,
+            data: articles.map((a) => ({
+                title: a.title,
+                url: a.url,
+                image: a.urlToImage,
+                source: a.source ? a.source.name : '',
+                publishedAt: a.publishedAt,
+            })),
+        };
+        newsCache[category] = { time: Date.now(), body };
+
+        console.log(`Trends: ${category} (${country}), ${articles.length} articles from NewsAPI`);
+        res.json({ error: false, cached: false, ...body });
+    } catch (err) {
+        console.error('NewsAPI error:', err.code || '', err.message);
+        if (err.code === 'rateLimited') {
+            return res.status(429).json({ error: true, message: 'NewsAPI daily limit reached, try again tomorrow' });
+        }
+        if (err.code === 'apiKeyInvalid' || err.code === 'apiKeyMissing') {
+            return res.status(500).json({ error: true, message: 'NewsAPI key is missing or wrong in .env' });
+        }
+        res.status(502).json({ error: true, message: 'Could not load trending news' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Listening at port: ${port}`)
