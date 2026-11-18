@@ -8,7 +8,7 @@ const jwt = require('jwt-simple');
 const passport = require('passport');
 const cors = require('cors');
 const multer = require('multer');
-const convertHeic = require('heic-convert');   // npm install heic-convert
+const convertHeic = require('heic-convert');
 const dotenv = require('dotenv').config()
 const port = process.env.PORT;
 const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
@@ -192,7 +192,7 @@ router.post('/login', loginAuth, (req, res) => {
     // Test Case
     const logSql = `INSERT INTO Login_log (Login_log_ID, login_datetime, login_status, UserID)
                     VALUES (?, ?, 'Success', ?)`;
-    const logId = 'L' + Date.now();   // e.g. L1763290000000, fits VARCHAR(20)
+    const logId = 'L' + Date.now();
 
     conn.query(logSql, [logId, new Date(), req.user.UserID], (err) => {
         if (err) console.error('Failed to log login:', err.message);
