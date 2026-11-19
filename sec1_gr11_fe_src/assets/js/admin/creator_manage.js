@@ -1,8 +1,3 @@
-// creator_manage.js: Add / Edit Creator page.
-//   /admin/creator                 -> add a new creator
-//   /admin/creator?id=C000000001   -> edit (and delete) that creator
-// Needs nav.js and common.js loaded first.
-
 const form = document.getElementById('creatorForm');
 const message = document.getElementById('formMessage');
 const editingId = new URLSearchParams(window.location.search).get('id');   // null when adding
@@ -94,15 +89,14 @@ const isImageFile = (file) =>
     file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name);
 
 
-function showChosenFile() {
-    const file = pictureInput.files[0];
+function showChosenFile(file = pictureInput.files[0]) {
     if (!file) return;
 
     dropText.textContent = `${file.name} (click or drop another to replace)`;
     removePictureInput.value = '0';
     clearPictureButton.hidden = false;
     if (/\.(heic|heif)$/i.test(file.name)) {
-        dropPreview.hidden = true;   
+        dropPreview.hidden = true;   // HEIC can't be previewed, it's converted to JPG when saved
     } else {
         dropPreview.src = URL.createObjectURL(file);
         dropPreview.hidden = false;
@@ -132,11 +126,17 @@ dropZone.addEventListener('drop', (e) => {
         return;
     }
 
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-    pictureInput.files = transfer.files;
+    showChosenFile(file); 
     showMessage(message, '', '');
-    showChosenFile();
+
+    // put the file into the hidden input so FormData uploads it
+    try {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        pictureInput.files = transfer.files;
+    } catch (err) {
+        showMessage(message, 'Your browser could not attach the dropped file, click the box to choose it instead', 'error');
+    }   
 });
 
 // stop the browser opening a file that's dropped just outside the box
