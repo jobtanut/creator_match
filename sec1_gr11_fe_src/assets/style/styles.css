@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     background-color: #F6EDF1;
@@ -78,25 +82,48 @@ main {
     padding: 10px 22px;
     background-color: #9B6883;
     color: #FFFFFF;
-    border: none;
+    border: 2px solid #9B6883;
     border-radius: 25px;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
     text-decoration: none;
     cursor: pointer;
-    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(118, 101, 141, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.button:hover {
+    background-color: #85566F;
+    border-color: #85566F;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(118, 101, 141, 0.35);
+}
+
+.button:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 1px 3px rgba(118, 101, 141, 0.3);
 }
 
 .button-clear {
     background-color: transparent;
     color: #9B6883;
-    border: 3px solid #9B6883;
+    box-shadow: none;
 }
 
-.button:hover {
-    opacity: 0.5;
+.button-clear:hover {
+    background-color: #9B6883;
+    color: #FFFFFF;
 }
 
 .secondary-button {
     background-color: #716A75;
+    border-color: #716A75;
+}
+
+.secondary-button:hover {
+    background-color: #5E5862;
+    border-color: #5E5862;
 }
 
 .creator-list {
@@ -114,7 +141,6 @@ main {
     background-color: #FFFFFF;
     border: 1px solid #FAF7F2;
     border-radius: 15px;
-    
     text-align: center;
 }
 
@@ -217,7 +243,7 @@ input, select, textarea {
 .team-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; 
+    justify-content: center;
     gap: 24px;
     max-width: 828px;
     margin: 32px auto;
@@ -271,9 +297,9 @@ th {
 
 .action-button {
     display: inline-block;
-    padding: 6px 10px;
+    padding: 6px 12px;
     border: 1px solid #9B6883;
-    border-radius: 5px;
+    border-radius: 6px;
     background-color: #FAFAF7;
     color: #332F3A;
     font-family: Arial, sans-serif;
@@ -281,11 +307,32 @@ th {
     line-height: 1.2;
     text-decoration: none;
     cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .action-button:hover {
     background-color: #9B6883;
     color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.action-button:active {
+    transform: scale(0.95);
+}
+
+.button:disabled,
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.button:focus-visible,
+.action-button:focus-visible,
+.filter-button:focus-visible {
+    outline: 3px solid #C9A9BC;
+    outline-offset: 2px;
 }
 
 footer {
@@ -339,6 +386,12 @@ footer {
     border: 1px solid #9B6883;
     border-radius: 20px;
     cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.filter-button:hover {
+    background-color: #F6EDF1;
+    transform: translateY(-1px);
 }
 
 .filter-button.active {
@@ -346,11 +399,15 @@ footer {
     color: #FFFFFF;
 }
 
+.filter-button.active:hover {
+    background-color: #85566F;
+}
+
 .trend-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 200px;
-    grid-auto-flow: dense;      /* fills gaps so the mosaic has no holes */
+    grid-auto-flow: dense;
     gap: 6px;
     margin-top: 10px;
 }
@@ -369,7 +426,7 @@ footer {
     background-position: center;
 }
 
-/* colour wash over the photo, like the reference */
+/* Color wash tint */
 .trend-tile::before {
     content: '';
     position: absolute;
@@ -385,7 +442,7 @@ footer {
 
 .trend-tag,
 .trend-text {
-    position: relative;     /* sits above the colour wash */
+    position: relative;
 }
 
 .trend-tag {
@@ -428,5 +485,15 @@ footer {
 @media screen and (max-width: 700px) {
     .trend-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button, .action-button, .filter-button {
+        transition: none;
+    }
+
+    .button:hover, .action-button:hover {
+        transform: none;
     }
 }
