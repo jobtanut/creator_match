@@ -193,22 +193,22 @@ INSERT INTO User_account (UserID, username, email, password, first_name, last_na
 ('U000000101', 'user1', 'user1@example.com', 'user1pass', 'Somchai', 'Jaidee', 2),
 ('U000000102', 'user2', 'user2@example.com', 'user2pass', 'Suda',    'Rakdee', 2);
 
--- Creators (exported from the live database)
+-- Mock Creators
 INSERT INTO Creator (creatorID, category, c_first_name, c_last_name, creator_name, followers, creator_picture_Link, Description, Status) VALUES
 ('C907420921', 'Fashion', 'polly', 'Pinsumrong', 'aomsin', 99999, '/creators/1794907419484.jpg', 'tum dai tuk yang loei jaaa', 'Active'),
-('C000000106', 'Fashion', 'Bank', 'Thanakorn', 'BankFits', 210000, NULL, 'Streetwear lookbooks and sneaker reviews', 'Active'),
-('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1794904671516.jpg', 'Eat with Gun', 'Active'),
-('C000000103', 'Lifestyle', 'Fah', 'Chaiyaporn', 'FahDaily', 1200000, NULL, 'Daily vlogs, morning routines and room makeovers', 'Active'),
+('C000000106', 'Fashion', 'Bank', 'Thanakorn', 'BankFits', 210000, '/creators/1795072367291.jpg', 'Streetwear lookbooks and sneaker reviews', 'Active'),
+('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1795020383088.jpg', 'Eat with Gun', 'Active'),
+('C000000103', 'Lifestyle', 'Fah', 'Chaiyaporn', 'FahDaily', 1200000, '/creators/1795020203881.jpg', 'Daily vlogs, morning routines and room makeovers', 'Active'),
 ('C901951047', 'Food', 'Gunticha', 'Inma', 'Gun Inma', 10000, '/creators/1794902052857.jpg', 'Likes Food', 'Active'),
-('C000000109', 'Food', 'Jay', 'Boonmee', 'JayDessert', 880000, '/creators/1794908821274.avif', 'Dessert recipes and cafe dessert reviews', 'Active'),
-('C901885581', 'Food', 'Tanut', 'Noumanong', 'Job Tanut', 0, NULL, 'Personal Systems that sync tools and make workflows efficient', 'Active'),
-('C000000102', 'Food', 'Krit', 'Somboon', 'KritCooks', 98000, NULL, 'Easy Thai home cooking in under 20 minutes', 'Active'),
+('C000000109', 'Food', 'Jay', 'Boonmee', 'JayDessert', 880000, '/creators/1795001081264.jpg', 'Dessert recipes and cafe dessert reviews', 'Active'),
+('C901885581', 'Food', 'Tanut', 'Noumanong', 'Job Tanut', 0, '/creators/1795020253456.jpg', 'Personal Systems that sync tools and make workflows efficient', 'Active'),
+('C000000102', 'Food', 'Krit', 'Somboon', 'KritCooks', 98000, '/creators/1795020287676.jpg', 'Easy Thai home cooking in under 20 minutes', 'Active'),
 ('C000000110', 'Lifestyle', 'Mint', 'Chanthara', 'MintFitLife', 150000, NULL, 'Home workouts and healthy meal prep', 'Inactive'),
-('C000000108', 'Technology', 'Mook', 'Prasert', 'MookCodes', 15000, NULL, 'Beginner coding tutorials and student life in ICT', 'Active'),
-('C000000104', 'Lifestyle', 'Nont', 'Wongsiri', 'NontSlowLife', 35000, NULL, 'Slow living, cafe hopping and weekend trips', 'Active'),
-('C000000101', 'Food', 'Ploy', 'Rattanakul', 'PloyEats', 450000, NULL, 'Street food tours around Bangkok and honest restaurant reviews', 'Active'),
-('C000000105', 'Fashion', 'Pim', 'Srisuk', 'StyleByPim', 670000, NULL, 'Thrifted outfits and styling tips on a budget', 'Active'),
-('C000000107', 'Technology', 'Tom', 'Kittipong', 'TechTom', 320000, NULL, 'Gadget reviews and phone comparisons in Thai', 'Active');
+('C000000108', 'Technology', 'Mook', 'Prasert', 'MookCodes', 15000, '/creators/1795020312755.jpg', 'Beginner coding tutorials and student life in ICT', 'Active'),
+('C000000104', 'Lifestyle', 'Nont', 'Wongsiri', 'NontSlowLife', 35000, '/creators/1795020326046.jpg', 'Slow living, cafe hopping and weekend trips', 'Active'),
+('C000000101', 'Food', 'Ploy', 'Rattanakul', 'PloyEats', 450000, '/creators/1795020350486.jpg', 'Street food tours around Bangkok and honest restaurant reviews', 'Active'),
+('C000000105', 'Fashion', 'Pim', 'Srisuk', 'StyleByPim', 670000, '/creators/1795020446293.jpg', 'Thrifted outfits and styling tips on a budget', 'Active'),
+('C000000107', 'Technology', 'Tom', 'Kittipong', 'TechTom', 320000, '/creators/1795020463947.jpg', 'Gadget reviews and phone comparisons in Thai', 'Active');
 
 -- Their platforms
 INSERT INTO Creator_Platform (Platform, creatorID) VALUES
@@ -252,19 +252,3 @@ INSERT INTO Management (superAdminID, AdminID, manage_timestamp) VALUES
 ('U000000001', 'U000000002', '2026-11-15 10:00:00'),
 ('U000000001', 'U000000003', '2026-11-15 10:05:00');
 
--- Mock Creators
-INSERT INTO Creator (creatorID, category, c_first_name, c_last_name, creator_name, followers, creator_picture_Link, Description, Status) VALUES
-('C907420921', 'Fashion', 'polly', 'Pinsumrong', 'aomsin', 99999, '/creators/1794907419484.jpg', 'tum dai tuk yang loei jaaa', 'Active'),
-('C000000106', 'Fashion', 'Bank', 'Thanakorn', 'BankFits', 210000, '/creators/1795072367291.jpg', 'Streetwear lookbooks and sneaker reviews', 'Active'),
-('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1795020383088.jpg', 'Eat with Gun', 'Active'),
-('C000000103', 'Lifestyle', 'Fah', 'Chaiyaporn', 'FahDaily', 1200000, '/creators/1795020203881.jpg', 'Daily vlogs, morning routines and room makeovers', 'Active'),
-('C901951047', 'Food', 'Gunticha', 'Inma', 'Gun Inma', 10000, '/creators/1794902052857.jpg', 'Likes Food', 'Active'),
-('C000000109', 'Food', 'Jay', 'Boonmee', 'JayDessert', 880000, '/creators/1795001081264.jpg', 'Dessert recipes and cafe dessert reviews', 'Active'),
-('C901885581', 'Food', 'Tanut', 'Noumanong', 'Job Tanut', 0, '/creators/1795020253456.jpg', 'Personal Systems that sync tools and make workflows efficient', 'Active'),
-('C000000102', 'Food', 'Krit', 'Somboon', 'KritCooks', 98000, '/creators/1795020287676.jpg', 'Easy Thai home cooking in under 20 minutes', 'Active'),
-('C000000110', 'Lifestyle', 'Mint', 'Chanthara', 'MintFitLife', 150000, NULL, 'Home workouts and healthy meal prep', 'Inactive'),
-('C000000108', 'Technology', 'Mook', 'Prasert', 'MookCodes', 15000, '/creators/1795020312755.jpg', 'Beginner coding tutorials and student life in ICT', 'Active'),
-('C000000104', 'Lifestyle', 'Nont', 'Wongsiri', 'NontSlowLife', 35000, '/creators/1795020326046.jpg', 'Slow living, cafe hopping and weekend trips', 'Active'),
-('C000000101', 'Food', 'Ploy', 'Rattanakul', 'PloyEats', 450000, '/creators/1795020350486.jpg', 'Street food tours around Bangkok and honest restaurant reviews', 'Active'),
-('C000000105', 'Fashion', 'Pim', 'Srisuk', 'StyleByPim', 670000, '/creators/1795020446293.jpg', 'Thrifted outfits and styling tips on a budget', 'Active'),
-('C000000107', 'Technology', 'Tom', 'Kittipong', 'TechTom', 320000, '/creators/1795020463947.jpg', 'Gadget reviews and phone comparisons in Thai', 'Active');
