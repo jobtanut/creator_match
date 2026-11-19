@@ -627,6 +627,13 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
 //     followers: -10
 //   expected: 400, "Followers must be a whole number, 0 or more"
 
+// Deletes a creator picture file from the FE public folder (link looks like /creators/1763350000000.jpg)
+const removePictureFile = (link) => {
+    if (!link) return;
+    const picturePath = path.join(__dirname, '..', '..', 'sec1_gr11_fe_src', 'public', link);
+    fs.promises.unlink(picturePath).catch(() => {});
+};
+
 //Edit Creators
 router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture'), fixHeic, async (req, res) => {
     const creatorId = req.params.id;
@@ -634,10 +641,12 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
     if (error) return res.status(400).json({ error: true, message: error });
 
     try {
-        const [found] = await db.query('SELECT creatorID FROM Creator WHERE creatorID = ?', [creatorId]);
+        const [found] = await db.query('SELECT creator_picture_Link FROM Creator WHERE creatorID = ?', [creatorId]);
         if (found.length === 0) {
             return res.status(404).json({ error: true, message: 'Creator not found' });
         }
+        const oldPicture = found[0].creator_picture_Link;
+        const clearPicture = req.body.remove_picture === '1';
 
         await db.beginTransaction();
 
@@ -650,15 +659,22 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
              data.followers, data.Description, data.status, creatorId]
         );
 
+        // a new file wins; otherwise "Clear Picture" sets it to empty
         if (req.file) {
             await db.query('UPDATE Creator SET creator_picture_Link = ? WHERE creatorID = ?',
                 [`/creators/${req.file.filename}`, creatorId]);
+        } else if (clearPicture) {
+            await db.query('UPDATE Creator SET creator_picture_Link = NULL WHERE creatorID = ?', [creatorId]);
         }
 
         await savePlatforms(creatorId, data.platforms);
         await logEdit(req.user.UserID, creatorId, 'Update');
 
         await db.commit();
+
+        // only delete the old file once the database change is saved
+        if (req.file || clearPicture) removePictureFile(oldPicture);
+
         console.log(`Creator ${creatorId} updated by ${req.user.username}`);
         res.json({ error: false, message: 'Creator updated' });
     } catch (err) {

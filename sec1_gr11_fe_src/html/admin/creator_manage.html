@@ -75,7 +75,8 @@
                 <img id="dropPreview" alt="" hidden>
             </label>
             <input type="file" id="picture" name="picture" accept="image/*,.heic,.heif" class="visually-hidden">
-
+                        <input type="hidden" id="remove_picture" name="remove_picture" value="0">
+            <p><button class="button button-clear" type="button" id="clearPictureButton" hidden>Clear Picture</button></p>
             <button class="button" type="submit" id="submitButton">Add Creator</button>
             <a class="button" href="/admin/creators">Cancel</a>
             <button class="button" type="button" id="deleteButton" hidden>Delete Creator</button>

@@ -26,6 +26,7 @@ async function loadCreatorForEdit() {
             dropPreview.src = c.creator_picture_Link;
             dropPreview.hidden = false;
             dropText.textContent = 'Current picture. Drop or click to replace it';
+            clearPictureButton.hidden = false;
         }
 
         document.title = `CreatorMatch - Edit ${c.creator_name}`;
@@ -42,7 +43,7 @@ async function loadCreatorForEdit() {
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const body = new FormData(form);   // includes the picture file if one was chosen
+    const body = new FormData(form); 
 
     try {
         if (editingId) {
@@ -74,37 +75,53 @@ const dropZone = document.getElementById('dropZone');
 const dropText = document.getElementById('dropText');
 const dropPreview = document.getElementById('dropPreview');
 const pictureInput = form.picture;
+const clearPictureButton = document.getElementById('clearPictureButton');
+const removePictureInput = document.getElementById('remove_picture');
+
+// Clear Picture
+function clearPicture() {
+    pictureInput.value = '';
+    dropPreview.hidden = true;
+    dropPreview.removeAttribute('src');
+    dropText.textContent = 'No picture. Drag and drop a picture here, or click to choose';
+    removePictureInput.value = editingId ? '1' : '0';
+    clearPictureButton.hidden = true;
+}
+
+clearPictureButton.addEventListener('click', clearPicture);
 
 const isImageFile = (file) =>
     file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name);
 
-// Shows the chosen file's name, and a preview if the browser can display it (HEIC can't be previewed)
+
 function showChosenFile() {
     const file = pictureInput.files[0];
     if (!file) return;
 
     dropText.textContent = `${file.name} (click or drop another to replace)`;
+    removePictureInput.value = '0';
+    clearPictureButton.hidden = false;
     if (/\.(heic|heif)$/i.test(file.name)) {
-        dropPreview.hidden = true;   // converted to JPG on the server after upload
+        dropPreview.hidden = true;   
     } else {
         dropPreview.src = URL.createObjectURL(file);
         dropPreview.hidden = false;
     }
 }
 
-// clicking the box opens the file picker by itself, because the box is a <label for="picture">
+// clicking the box opens the file picker by itself
 pictureInput.addEventListener('change', showChosenFile);
 
 // highlight while a file is dragged over the box
 ['dragenter', 'dragover'].forEach((type) => dropZone.addEventListener(type, (e) => {
-    e.preventDefault();   // without this the browser opens the file instead of dropping it
+    e.preventDefault();
     dropZone.classList.add('dragging');
 }));
 ['dragleave', 'drop'].forEach((type) => dropZone.addEventListener(type, () => {
     dropZone.classList.remove('dragging');
 }));
 
-// dropping a file puts it into the hidden file input, so FormData sends it like a normal pick
+// dropping a file puts it into the hidden file input
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
