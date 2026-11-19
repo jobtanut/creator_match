@@ -1,4 +1,4 @@
-# Dependencies (rebuilt with npm install)
+# Dependencies
 node_modules/
 
 # Secrets: database password, JWT secret, NewsAPI key
