@@ -7,24 +7,31 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_menu.html"))
 });
 
-// Add / edit one creator
-router.get('/account', (req, res) => {
+// Admin
+router.get('/adminmanage', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_manage.html"))
 });
 
-// Admin Manage: search + list
-router.get('/search', (req, res) => {
+router.get('/admins', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "admin_search.html"))
 });
 
-// Add / edit one admin
+// Creator
 router.get('/creators', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "creator_search.html"))
 });
 
-// Creator Manage: search + list
 router.get('/creatormanage', (req, res) => {
     res.sendFile(path.join(__dirname, '..', "html", "admin", "creator_manage.html"))
+});
+
+//User
+router.get('/users', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', "html", "admin", "user_search.html"))
+});
+
+router.get('/usermanage', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', "html", "admin", "user_manage.html"))
 });
 
 module.exports = router;

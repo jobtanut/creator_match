@@ -29,6 +29,10 @@ router.get('/', (req,res) => {
     res.sendFile(path.join(__dirname, "html", "home.html"));
 });
 
+router.get('/profile', (req, res) => {
+    res.sendFile(path.join(__dirname, "html", "userprofile.html"));
+})
+
 app.listen(port, () => {
     console.log(`Frontend server listening on port: ${port}`)
 });

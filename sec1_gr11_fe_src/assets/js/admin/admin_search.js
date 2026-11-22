@@ -40,7 +40,7 @@ function renderTable() {
             <td>${escapeHtml(a.Position || '-')}</td>
             <td>${escapeHtml(a.TeamMemberID || '-')}</td>
             <td>
-                <a class="action-button" href="/admin/account?id=${encodeURIComponent(a.UserID)}">Edit</a>
+                <a class="action-button" href="/admin/admins?id=${encodeURIComponent(a.UserID)}">Edit</a>
                 ${me && me.sub === a.username
                     ? '(you)'
                     : `<button class="action-button" onclick="deleteAdmin('${a.UserID}')">Delete</button>`}

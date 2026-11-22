@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - Add User</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        .form-message.error { color: #d33; }
+        .form-message.success { color: #2a8a3e; }
+        .user-picture {
+            width: 100px; height: 100px; border-radius: 50%; object-fit: cover; display: block;
+        }
+        .checkbox-line { display: flex; align-items: center; gap: 8px; font-weight: normal; }
+        .checkbox-line input { width: auto; }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <p><a class="button" href="/admin/users">Back to User Manage</a></p>
+
+    <!-- One page for both: /admin/user = add, /admin/user?id=U000000101 = edit -->
+    <section class="panel">
+        <h1 id="formTitle">Add User</h1>
+
+        <form id="userForm">
+            <div id="pictureSection" hidden>
+                <p><b>Profile Picture</b></p>
+                <img id="userPicture" class="user-picture" alt="">
+                <label class="checkbox-line">
+                    <input type="checkbox" id="remove_picture"> Remove this picture
+                </label>
+            </div>
+
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" maxlength="30" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" maxlength="100" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="8" placeholder="At least 8 characters">
+
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" maxlength="50" required>
+
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" maxlength="50" required>
+
+            <label for="Bio">Bio</label>
+            <textarea id="Bio" name="Bio" maxlength="255" rows="3"></textarea>
+
+            <button class="button" type="submit" id="submitButton">Add User</button>
+            <a class="button button-clear" href="/admin/users">Cancel</a>
+            <button class="button secondary-button" type="button" id="deleteButton" hidden>Delete User</button>
+
+            <p id="formMessage" class="form-message"></p>
+        </form>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>requireAdmin();</script>
+<script src="/js/admin/common.js"></script>
+<script src="/js/admin/user_manage.js"></script>
+</body>
+</html>
