@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - User Accounts</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <style>
+        .form-message.error { color: #d33; }
+        .form-message.success { color: #2a8a3e; }
+        .user-thumb {
+            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: #9B6883; color: #FFFFFF; font-weight: bold; font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>User Manage</h1>
+    <p>
+        <a class="button" href="/admin/usermanage">Add User</a>
+        <a class="button" href="/admin">Back to Admin Menu</a>
+    </p>
+
+    <!-- Search users: name, email (any combination, or none for all) -->
+    <section class="panel">
+        <h2>Search Users</h2>
+        <form id="userSearchForm">
+            <label for="searchName">Name or Username</label>
+            <input type="text" id="searchName">
+
+            <label for="searchEmail">Email</label>
+            <input type="text" id="searchEmail">
+
+            <button class="button" type="submit">Search</button>
+            <button class="button" type="button" id="searchClear">Clear</button>
+        </form>
+    </section>
+
+    <section>
+        <h2 id="userListTitle">User List</h2>
+        <p id="listMessage" class="form-message"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Picture</th>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userRows">
+                <tr><td colspan="7">Loading...</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>requireAdmin();</script>
+<script src="/js/admin/common.js"></script>
+<script src="/js/admin/user_search.js"></script>
+</body>
+</html>

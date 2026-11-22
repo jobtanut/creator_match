@@ -497,3 +497,117 @@ footer {
         transform: none;
     }
 }
+
+#nav-links {
+    display: flex;
+    align-items: center;
+}
+
+.nav-menu {
+    position: relative;
+    margin-left: 20px;
+}
+
+.nav-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 4px 4px;
+    background: none;
+    border: none;
+    border-radius: 20px;
+    color: #332F3A;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.nav-profile:hover,
+.nav-profile[aria-expanded="true"] {
+    background-color: #F6EDF1;
+}
+
+.nav-caret {
+    font-size: 11px;
+    color: #716A75;
+}
+
+.nav-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 100;
+    min-width: 160px;
+    padding: 6px 0;
+    background-color: #FFFFFF;
+    border: 1px solid #F6EDF1;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(118, 101, 141, 0.2);
+}
+
+.nav-dropdown a {
+    display: block;
+    margin: 0;
+    padding: 10px 16px;
+}
+
+.nav-dropdown a:hover {
+    background-color: #F6EDF1;
+    text-decoration: none;
+}
+
+.nav-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #9B6883;
+    color: #FFFFFF;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.nav-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-panel {
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.profile-drop {
+    padding: 20px;
+    border: 2px dashed #C9A9BC;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.profile-drop.dragging {
+    border-style: solid;
+    background-color: #F6EDF1;
+}
+
+.drop-zone img.profile-preview {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 10px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+#formMessage.error {
+    color: rgb(157, 36, 36);
+}
+
+#formMessage.success {
+    color: #4F7A55;
+}

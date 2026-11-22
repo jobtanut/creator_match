@@ -55,7 +55,7 @@ const fixHeic = async (req, res, next) => {
         const jpgName = path.parse(req.file.filename).name + '.jpg';
         const jpgPath = path.join(path.dirname(req.file.path), jpgName);
         await fs.promises.writeFile(jpgPath, Buffer.from(output));
-        await fs.promises.unlink(req.file.path);   // delete the original .heic
+        await fs.promises.unlink(req.file.path);
 
         req.file.filename = jpgName;
         req.file.path = jpgPath;
@@ -733,53 +733,6 @@ router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) =>
     }
 });
 
-
-// ------------------ TEAM (About Us page) ------------------
-// Testing Team members (public)
-// Test 1:
-//   method: GET
-//   URL: http://localhost:3030/team
-//   expected: 200, 5 team members
-// Test 2 (check the fields):
-//   method: GET
-//   URL: http://localhost:3030/team
-//   expected: every item has t_first_name, t_last_name, position, email,
-//             member_picture_link and social_link
-
-//List Team
-// const TEAM_FIELDS = `TeamMemberID, t_first_name, t_last_name, position, role, email,
-//                      member_picture_link, social_link`;
-
-// router.get('/team', async (req, res) => {
-//     try {
-//         const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member ORDER BY TeamMemberID`);
-//         res.json({ error: false, data: rows });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: true, message: 'Could not load team' });
-//     }
-// });
-
-// Testing One team member (public)
-// Test 1:
-//   method: GET
-//   URL: http://localhost:3030/team/T000000001
-//   expected: 200, Tanut Noumanong with social_link https://github.com/jobtanut
-// Test 2 (does not exist):
-//   method: GET
-//   URL: http://localhost:3030/team/T999999999
-//   expected: 404, "Team member not found"
-router.get('/team/:id', async (req, res) => {
-    try {
-        const [rows] = await db.query(`SELECT ${TEAM_FIELDS} FROM Team_Member WHERE TeamMemberID = ?`, [req.params.id]);
-        if (rows.length === 0) return res.status(404).json({ error: true, message: 'Team member not found' });
-        res.json({ error: false, data: rows[0] });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: true, message: 'Could not load team member' });
-    }
-});
-
 // ------------------ ADMIN ACCOUNTS (admin only) ------------------
  
 // Admin accounts are rows in User_account with Role_ID = 1. Passwords are never sent back.
@@ -1151,6 +1104,375 @@ router.get('/trends', async (req, res) => {
             return res.status(500).json({ error: true, message: 'NewsAPI key is missing or wrong in .env' });
         }
         res.status(502).json({ error: true, message: 'Could not load trending news' });
+    }
+});
+
+// MY PROFILE (any logged-in user)
+
+const USERS_DIR = path.join(__dirname, '..', '..', 'sec1_gr11_fe_src', 'public', 'users');
+fs.mkdirSync(USERS_DIR, { recursive: true });
+
+const userUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, USERS_DIR),
+        filename: (req, file, cb) => cb(null, 'U' + Date.now() + path.extname(file.originalname)),
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const ok = /^image\//i.test(file.mimetype) || /\.(heic|heif)$/i.test(file.originalname);
+        cb(ok ? null : new Error('Profile picture must be an image file'), ok);
+    },
+});
+
+// Deletes an old profile picture
+const removeUserPicture = (link) => {
+    if (!link || !link.startsWith('/users/')) return;
+    fs.promises.unlink(path.join(USERS_DIR, path.basename(link))).catch(() => {});
+};
+
+const ME_FIELDS = `UserID, username, email, first_name, last_name, Position, User_picture_link, Bio, Role_ID, created_at`;
+
+// Testing View my profile
+// Test 1 (logged in):
+//   method: GET
+//   URL: http://localhost:3030/me
+//   header: Authorization: <user1 token>
+//   expected: 200, user1's details (Somchai), no password field
+// Test 2 (no token):
+//   method: GET
+//   URL: http://localhost:3030/me
+//   expected: 401 Unauthorized
+
+router.get('/me', requireJWTAuth, async (req, res) => {
+    try {
+        const [rows] = await db.query(`SELECT ${ME_FIELDS} FROM User_account WHERE UserID = ?`, [req.user.UserID]);
+        res.json({ error: false, data: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load your profile' });
+    }
+});
+
+// Testing Edit my profile. Leave the password fields out to keep the current password.
+// Test 1 (change bio and picture):
+//   method: PUT
+//   URL: http://localhost:3030/me
+//   header: Authorization: <user1 token>
+//   body: form-data
+//     first_name: Somchai
+//     last_name: Jaidee
+//     email: user1@example.com
+//     Bio: Food lover looking for Thai creators
+//     picture: (type File) choose a .jpg / .png / .heic
+//   expected: 200, "Profile updated", "User_picture_link": "/users/U....jpg"
+// Test 2 (wrong current password):
+//   method: PUT
+//   URL: http://localhost:3030/me
+//   header: Authorization: <user1 token>
+//   body: form-data
+//     first_name: Somchai
+//     last_name: Jaidee
+//     email: user1@example.com
+//     current_password: wrongpass
+//     new_password: newpass123
+//     confirm_password: newpass123
+//   expected: 400, "Current password is incorrect"
+
+router.put('/me', requireJWTAuth, userUpload.single('picture'), fixHeic, async (req, res) => {
+    const newFile = req.file ? `/users/${req.file.filename}` : null;
+    // if anything below fails, don't leave the uploaded file lying around
+    const fail = (status, message) => {
+        removeUserPicture(newFile);
+        res.status(status).json({ error: true, message });
+    };
+
+    const first_name = (req.body.first_name || '').trim();
+    const last_name = (req.body.last_name || '').trim();
+    const email = (req.body.email || '').trim();
+    const Bio = (req.body.Bio || '').trim() || null;
+    const currentPassword = req.body.current_password || '';
+    const newPassword = req.body.new_password || '';
+    const confirmPassword = req.body.confirm_password || '';
+    const clearPicture = req.body.remove_picture === '1';
+
+    if (!first_name || !last_name || !email) return fail(400, 'First name, last name and email are required');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(400, 'Please enter a valid email');
+    if (Bio && Bio.length > 255) return fail(400, 'Bio must be 255 characters or less');
+
+    if (newPassword) {
+        if (newPassword.length < 8) return fail(400, 'New password must be at least 8 characters');
+        if (newPassword !== confirmPassword) return fail(400, 'New passwords do not match');
+        if (currentPassword !== req.user.password) return fail(400, 'Current password is incorrect');
+    }
+
+    try {
+        const oldPicture = req.user.User_picture_link;
+
+        await db.query(
+            'UPDATE User_account SET first_name = ?, last_name = ?, email = ?, Bio = ? WHERE UserID = ?',
+            [first_name, last_name, email, Bio, req.user.UserID]
+        );
+        if (newPassword) {
+            await db.query('UPDATE User_account SET password = ? WHERE UserID = ?', [newPassword, req.user.UserID]);
+        }
+
+        // a new file wins
+        if (newFile) {
+            await db.query('UPDATE User_account SET User_picture_link = ? WHERE UserID = ?', [newFile, req.user.UserID]);
+            removeUserPicture(oldPicture);
+        } else if (clearPicture) {
+            await db.query('UPDATE User_account SET User_picture_link = NULL WHERE UserID = ?', [req.user.UserID]);
+            removeUserPicture(oldPicture);
+        }
+
+        const [rows] = await db.query(`SELECT ${ME_FIELDS} FROM User_account WHERE UserID = ?`, [req.user.UserID]);
+        console.log(`Profile ${req.user.UserID} (${req.user.username}) updated`);
+        res.json({ error: false, message: 'Profile updated', data: rows[0] });
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') return fail(409, 'That email is already used by another account');
+        console.error(err);
+        fail(500, 'Could not update your profile');
+    }
+});
+
+// ------------------ USER ACCOUNTS (admin only) ------------------
+// Regular users are rows in User_account with Role_ID = 2. Passwords are never sent back.
+// Needs removeUserPicture from the MY PROFILE section above.
+
+const USER_FIELDS = `UserID, username, email, first_name, last_name, User_picture_link, Bio, created_at`;
+
+// Reads and checks the user form. passwordRequired = true when adding, false when editing.
+const readUserForm = (body, passwordRequired) => {
+    const data = {
+        username: (body.username || '').trim(),
+        email: (body.email || '').trim(),
+        password: body.password || '',
+        first_name: (body.first_name || '').trim(),
+        last_name: (body.last_name || '').trim(),
+        Bio: (body.Bio || '').trim() || null,
+    };
+
+    if (!data.username || !data.email || !data.first_name || !data.last_name) {
+        return { error: 'Username, email, first name and last name are required' };
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return { error: 'Please enter a valid email' };
+    if (passwordRequired && !data.password) return { error: 'Password is required' };
+    if (data.password && data.password.length < 8) return { error: 'Password must be at least 8 characters' };
+    if (data.Bio && data.Bio.length > 255) return { error: 'Bio must be 255 characters or less' };
+
+    return { data };
+};
+
+// Testing Search / list user accounts (admin only). No criteria = every user.
+// Test 1 (all users):
+//   method: GET
+//   URL: http://localhost:3030/users
+//   header: Authorization: <admin token>
+//   expected: 200, "count": 2, no password field in any result
+// Test 2 (search with criteria):
+//   method: GET
+//   URL: http://localhost:3030/users?name=somchai&email=example
+//   header: Authorization: <admin token>
+//   expected: 200, one result: user1 (Somchai Jaidee)
+
+router.get('/users', requireJWTAuth, requireAdmin, async (req, res) => {
+    try {
+        const name = (req.query.name || '').trim();
+        const email = (req.query.email || '').trim();
+
+        const conditions = ['Role_ID = ?'];
+        const params = [ROLE_USER];
+
+        if (name) {
+            conditions.push('(first_name LIKE ? OR last_name LIKE ? OR username LIKE ?)');
+            params.push(`%${name}%`, `%${name}%`, `%${name}%`);
+        }
+        if (email) {
+            conditions.push('email LIKE ?');
+            params.push(`%${email}%`);
+        }
+
+        const [rows] = await db.query(
+            `SELECT ${USER_FIELDS} FROM User_account WHERE ${conditions.join(' AND ')} ORDER BY first_name`,
+            params
+        );
+        res.json({ error: false, count: rows.length, data: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load users' });
+    }
+});
+
+// Testing View one user account (admin only)
+// Test 1:
+//   method: GET
+//   URL: http://localhost:3030/users/U000000101
+//   header: Authorization: <admin token>
+//   expected: 200, user1 (Somchai Jaidee)
+// Test 2 (an admin's ID is not a regular user):
+//   method: GET
+//   URL: http://localhost:3030/users/U000000001
+//   header: Authorization: <admin token>
+//   expected: 404, "User not found"
+
+router.get('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT ${USER_FIELDS} FROM User_account WHERE UserID = ? AND Role_ID = ?`,
+            [req.params.id, ROLE_USER]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: true, message: 'User not found' });
+        res.json({ error: false, data: rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not load user' });
+    }
+});
+
+// Testing Add user account (admin only)
+// Test 1:
+//   method: POST
+//   URL: http://localhost:3030/users
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "malee",
+//     "email": "malee@example.com",
+//     "password": "malee1234",
+//     "first_name": "Malee",
+//     "last_name": "Sukjai",
+//     "Bio": "Looking for beauty creators"
+//   }
+//   expected: 200, "User added"
+// Test 2 (email already used):
+//   method: POST
+//   URL: http://localhost:3030/users
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "someonenew",
+//     "email": "user1@example.com",
+//     "password": "password123",
+//     "first_name": "Some",
+//     "last_name": "One"
+//   }
+//   expected: 409, "That email is already used"
+
+router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
+    const { data, error } = readUserForm(req.body, true);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    const userId = 'U' + String(Date.now()).slice(-9);
+
+    try {
+        await db.query(
+            `INSERT INTO User_account (UserID, username, email, password, first_name, last_name, Bio, Role_ID)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [userId, data.username, data.email, data.password, data.first_name, data.last_name, data.Bio, ROLE_USER]
+        );
+        console.log(`User ${userId} (${data.username}) created by ${req.user.username}`);
+        res.json({ error: false, message: 'User added', UserID: userId });
+    } catch (err) {
+        const msg = adminDbError(err);
+        if (msg) return res.status(409).json({ error: true, message: msg });
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not add user' });
+    }
+});
+
+// Edit User (Admin)
+
+// Testing Edit user account (admin only). Leave "password" out to keep the current one.
+// Test 1 (change bio and remove the profile picture):
+//   method: PUT
+//   URL: http://localhost:3030/users/U000000102
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "user2",
+//     "email": "user2@example.com",
+//     "first_name": "Suda",
+//     "last_name": "Rakdee",
+//     "Bio": "Brand manager for a cafe chain",
+//     "remove_picture": true
+//   }
+//   expected: 200, "User updated"
+// Test 2 (missing first name):
+//   method: PUT
+//   URL: http://localhost:3030/users/U000000102
+//   header: Authorization: <admin token>
+//   body: raw JSON
+//   {
+//     "username": "user2",
+//     "email": "user2@example.com",
+//     "last_name": "Rakdee"
+//   }
+//   expected: 400, "Username, email, first name and last name are required"
+
+router.put('/user/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    const userId = req.params.id;
+    const { data, error } = readUserForm(req.body, false);
+    if (error) return res.status(400).json({ error: true, message: error });
+
+    try {
+        const [found] = await db.query(
+            'SELECT User_picture_link FROM User_account WHERE UserID = ? AND Role_ID = ?', [userId, ROLE_USER]
+        );
+        if (found.length === 0) return res.status(404).json({ error: true, message: 'User not found' });
+
+        await db.query(
+            `UPDATE User_account SET username = ?, email = ?, first_name = ?, last_name = ?, Bio = ?
+             WHERE UserID = ?`,
+            [data.username, data.email, data.first_name, data.last_name, data.Bio, userId]
+        );
+        if (data.password) {
+            await db.query('UPDATE User_account SET password = ? WHERE UserID = ?', [data.password, userId]);
+        }
+        if (req.body.remove_picture === true || req.body.remove_picture === '1') {
+            await db.query('UPDATE User_account SET User_picture_link = NULL WHERE UserID = ?', [userId]);
+            removeUserPicture(found[0].User_picture_link);
+        }
+
+        console.log(`User ${userId} updated by ${req.user.username}`);
+        res.json({ error: false, message: 'User updated' });
+    } catch (err) {
+        const msg = adminDbError(err);
+        if (msg) return res.status(409).json({ error: true, message: msg });
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not update user' });
+    }
+});
+
+// Testing Delete user account (admin only)
+// Test 1:
+//   method: DELETE
+//   URL: http://localhost:3030/users/U000000102
+//   header: Authorization: <admin token>
+//   expected: 200, "User deleted"
+// Test 2 (an admin can't be deleted from here):
+//   method: DELETE
+//   URL: http://localhost:3030/users/U000000002
+//   header: Authorization: <admin token>
+//   expected: 404, "User not found"
+
+router.delete('/user/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const [found] = await db.query(
+            'SELECT username, User_picture_link FROM User_account WHERE UserID = ? AND Role_ID = ?', [userId, ROLE_USER]
+        );
+        if (found.length === 0) return res.status(404).json({ error: true, message: 'User not found' });
+
+        // Login_log rows are removed automatically by ON DELETE CASCADE
+        await db.query('DELETE FROM User_account WHERE UserID = ?', [userId]);
+        removeUserPicture(found[0].User_picture_link);
+
+        console.log(`User ${userId} (${found[0].username}) deleted by ${req.user.username}`);
+        res.json({ error: false, message: 'User deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: 'Could not delete user' });
     }
 });
 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CreatorMatch - My Profile</title>
+    <link rel="stylesheet" href="/style/styles.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo"><a href="/">CreatorMatch</a></div>
+        <div id="nav-links"></div>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="panel profile-panel">
+        <h1>My Profile</h1>
+
+        <form id="profileForm">
+            <p><b>Profile Picture</b></p>
+            <label class="drop-zone profile-drop" id="dropZone" for="picture">
+                <img id="dropPreview" class="profile-preview" alt="" hidden>
+                <span id="dropText">Drag and drop a picture here, or click to choose</span>
+            </label>
+            <input type="file" id="picture" name="picture" accept="image/*,.heic,.heif" class="visually-hidden">
+            <input type="hidden" id="remove_picture" name="remove_picture" value="0">
+            <p><button class="button button-clear" type="button" id="clearPictureButton" hidden>Clear Picture</button></p>
+
+            <label for="username">Username</label>
+            <input type="text" id="username" readonly>
+
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" maxlength="50" required>
+
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" maxlength="50" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" maxlength="100" required>
+
+            <label for="Bio">Bio</label>
+            <textarea id="Bio" name="Bio" maxlength="255" rows="3"></textarea>
+
+            <h2>Change Password</h2>
+            <p class="small-text">Leave these empty to keep your current password.</p>
+
+            <label for="current_password">Current Password</label>
+            <input type="password" id="current_password" name="current_password" autocomplete="current-password">
+
+            <label for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password" minlength="8" autocomplete="new-password">
+
+            <label for="confirm_password">Confirm New Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" minlength="8" autocomplete="new-password">
+
+            <button class="button" type="submit" id="saveButton">Save Changes</button>
+            <p id="formMessage"></p>
+        </form>
+    </section>
+</main>
+
+<footer>
+    <p>CreatorMatch &copy; 2026</p>
+</footer>
+
+<script src="/js/nav.js"></script>
+<script>requireLogin();</script>
+<script src="/js/userprofile.js"></script>
+</body>
+</html>
