@@ -3,18 +3,6 @@ const message = document.getElementById('formMessage');
 const teamSelect = document.getElementById('TeamMemberID');
 const editingId = new URLSearchParams(window.location.search).get('id');   // null when adding
 
-// ------------------ TEAM MEMBER DROPDOWN ------------------
-async function loadTeamOptions() {
-    try {
-        const data = await api('GET', '/team');
-        teamSelect.innerHTML = '<option value="">None</option>' + data.data.map((t) =>
-            `<option value="${escapeHtml(t.TeamMemberID)}">${escapeHtml(t.TeamMemberID)} - ${escapeHtml(t.t_first_name)} ${escapeHtml(t.t_last_name)}</option>`
-        ).join('');
-    } catch (err) {
-        // the dropdown keeps "None" if the team can't be loaded
-    }
-}
-
 // ------------------ EDIT MODE: load the admin into the form ------------------
 async function loadAdminForEdit() {
     try {
