@@ -1409,7 +1409,7 @@ router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
 //   }
 //   expected: 400, "Username, email, first name and last name are required"
 
-router.put('/user/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+router.put('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const userId = req.params.id;
     const { data, error } = readUserForm(req.body, false);
     if (error) return res.status(400).json({ error: true, message: error });
@@ -1455,7 +1455,7 @@ router.put('/user/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //   header: Authorization: <admin token>
 //   expected: 404, "User not found"
 
-router.delete('/user/:id', requireJWTAuth, requireAdmin, async (req, res) => {
+router.delete('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const userId = req.params.id;
 
     try {
