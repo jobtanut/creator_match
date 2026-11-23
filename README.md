@@ -42,7 +42,7 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 ## Clone โปรเจกต์
 
 ```bash
-git clone [repo-url]
+git clone https://github.com/jobtanut/creator_match.git
 cd [repo-folder]
 ```
 
