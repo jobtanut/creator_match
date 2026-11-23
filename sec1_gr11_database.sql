@@ -165,7 +165,7 @@ INSERT INTO User_account (UserID, username, email, password, first_name, last_na
 INSERT INTO Creator (creatorID, category, c_first_name, c_last_name, creator_name, followers, creator_picture_Link, Description, Status) VALUES
 ('C907420921', 'Fashion', 'polly', 'Pinsumrong', 'aomsin', 99999, '/creators/1794907419484.jpg', 'tum dai tuk yang loei jaaa', 'Active'),
 ('C000000106', 'Fashion', 'Bank', 'Thanakorn', 'BankFits', 210000, '/creators/1795072367291.jpg', 'Streetwear lookbooks and sneaker reviews', 'Active'),
-('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1795020383088.jpg', 'Eat with Gun', 'Active'),
+('C903652215', 'Lifestyle', 'Benya', 'Shinno', 'Bebe', 40000, '/creators/1795086410124.jpg', 'Eat with Gun', 'Active'),
 ('C000000103', 'Lifestyle', 'Fah', 'Chaiyaporn', 'FahDaily', 1200000, '/creators/1795020203881.jpg', 'Daily vlogs, morning routines and room makeovers', 'Active'),
 ('C901951047', 'Food', 'Gunticha', 'Inma', 'Gun Inma', 10000, '/creators/1794902052857.jpg', 'Likes Food', 'Active'),
 ('C000000109', 'Food', 'Jay', 'Boonmee', 'JayDessert', 880000, '/creators/1795001081264.jpg', 'Dessert recipes and cafe dessert reviews', 'Active'),
