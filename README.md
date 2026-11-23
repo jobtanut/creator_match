@@ -28,9 +28,13 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 10. [Public Web Service: NewsAPI](#public-web-service-newsapi)
 11. [API Reference](#api-reference)
 12. [ระบบ Authentication (JWT)](#ระบบ-authentication-jwt)
-13. [การอัปโหลดรูปภาพ (Multer)](#การอัปโหลดรูปภาพ-multer)
-14. [การทดสอบด้วย Postman](#การทดสอบด้วย-postman)
-15. [แก้ปัญหาที่พบบ่อย](#แก้ปัญหาที่พบบ่อย)
+13. [วิธีขอ Token สำหรับ Authorization](#วิธีขอ-token-สำหรับ-authorization)
+    - [ขอ Token ผ่าน Postman](#token-postman)
+    - [ขอ Token จากหน้าเว็บ](#token-browser)
+    - [นำ Token ไปใช้ใน Postman](#token-use)
+14. [การอัปโหลดรูปภาพ (Multer)](#การอัปโหลดรูปภาพ-multer)
+15. [การทดสอบด้วย Postman](#การทดสอบด้วย-postman)
+16. [แก้ปัญหาที่พบบ่อย](#แก้ปัญหาที่พบบ่อย)
 
 ## สิ่งที่ต้องติดตั้งก่อน
 
@@ -43,7 +47,7 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 
 ```bash
 git clone https://github.com/jobtanut/creator_match.git
-cd [repo-folder]
+cd creator_match
 ```
 
 ## โครงสร้างโปรเจกต์
@@ -319,7 +323,7 @@ Admin อัปโหลดรูปแทน User ไม่ได้ ลบไ�
 
 Base URL: `http://localhost:3030`
 
-Route ที่ต้อง Login ต้องแนบ Header `Authorization` เป็น token (ดูหัวข้อ [ระบบ Authentication](#ระบบ-authentication-jwt))
+Route ที่ต้อง Login ต้องแนบ Header `Authorization` เป็น token ดูวิธีขอ token ได้ที่ [วิธีขอ Token สำหรับ Authorization](#วิธีขอ-token-สำหรับ-authorization)
 
 ### Authentication
 
@@ -410,6 +414,66 @@ Route ที่ต้อง Login ต้องแนบ Header `Authorization` �
 
 Middleware `requireJWTAuth` ถอดรหัส token แล้วนำ Username ไปค้นใน Database อีกครั้ง เพื่อยืนยันว่าบัญชียังมีอยู่ ข้อมูลผู้ใช้จะอยู่ใน `req.user` จากนั้น Route ของ Admin จะผ่าน `requireAdmin` อีกชั้น ถ้า `Role_ID` ไม่ใช่ 1 จะได้ 403 "Admins only"
 
+## วิธีขอ Token สำหรับ Authorization
+
+Route ที่มีสิทธิ์ "Admin" หรือ "ผู้ที่ Login" ใน [API Reference](#api-reference) ต้องแนบ token ทุกครั้ง ถ้าไม่แนบจะได้ 401 Unauthorized ถ้าใช้ token ของ User กับ Route ของ Admin จะได้ 403 "Admins only"
+
+กดที่หัวข้อด้านล่างเพื่อเปิดดูขั้นตอนของแต่ละวิธี
+
+<a id="token-postman"></a>
+<details>
+<summary><b>วิธีที่ 1: ขอ Token ผ่าน Postman</b></summary>
+
+1. สร้าง Request ใหม่ เลือก Method เป็น `POST` และใส่ URL `http://localhost:3030/login`
+2. ไปที่แท็บ Body เลือก `x-www-form-urlencoded` แล้วเพิ่ม 2 ค่า
+
+   | Key | Value |
+   | :--- | :--- |
+   | `username` | `admin` |
+   | `password` | `admin1234` |
+
+   ถ้าต้องการ token ของ User ให้ใช้ `user1` / `user1pass` แทน
+3. กด Send แล้วเปิดแท็บ Cookies ในส่วน Response คัดลอกค่าของ `token`
+4. ถ้าแท็บ Cookies ว่าง ให้ไปที่แท็บ Settings ของ Request ปิด "Automatically follow redirects" แล้วกด Send อีกครั้ง Response จะเป็น 302 และ token อยู่ใน Header `Set-Cookie` (คัดลอกเฉพาะส่วนหลัง `token=` จนถึงก่อนเครื่องหมาย `;`)
+
+</details>
+
+<a id="token-browser"></a>
+<details>
+<summary><b>วิธีที่ 2: ขอ Token จากหน้าเว็บ</b></summary>
+
+1. เปิด `http://localhost:8081/auth/login` แล้ว Login ด้วยบัญชีที่ต้องการ
+2. กด F12 แล้วเปิดแท็บ Console
+3. พิมพ์คำสั่งนี้แล้วกด Enter
+
+   ```javascript
+   getCookie('token')
+   ```
+
+4. คัดลอกข้อความที่ได้ โดยไม่เอาเครื่องหมายคำพูด
+
+อีกทางหนึ่งคือ กด F12 แล้วไปที่แท็บ Application (ใน Safari คือ Storage) เลือก Cookies > `http://localhost:8081` แล้วคัดลอกค่าของ `token`
+
+</details>
+
+<a id="token-use"></a>
+<details>
+<summary><b>นำ Token ไปใช้ใน Postman</b></summary>
+
+1. เปิด Request ที่ต้องการทดสอบ เช่น `GET http://localhost:3030/admins`
+2. ไปที่แท็บ Headers แล้วเพิ่มค่านี้
+
+   | Key | Value |
+   | :--- | :--- |
+   | `Authorization` | token ที่คัดลอกมา |
+
+3. ไม่ต้องใส่คำว่า `Bearer` นำหน้า เพราะ Web Service อ่าน token ตรงจาก Header (`ExtractJwt.fromHeader('authorization')`)
+4. กด Send ถ้าได้ 200 แสดงว่าใช้ได้
+
+</details>
+
+Token ไม่มีวันหมดอายุ แต่จะใช้ไม่ได้ถ้า Username ของบัญชีนั้นเปลี่ยน หรือมีการลบบัญชีนั้นไปแล้ว ในกรณีนี้ให้ Login ใหม่เพื่อขอ token ใหม่
+
 ## การอัปโหลดรูปภาพ (Multer)
 
 Web Service ใช้ Multer รับไฟล์จาก `multipart/form-data` แล้วเขียนไฟล์ลงโฟลเดอร์ `public` ของ Frontend โดยตรง หน้าเว็บจึงแสดงรูปได้ทันที
@@ -425,7 +489,7 @@ Web Service ใช้ Multer รับไฟล์จาก `multipart/form-data
 - รูป HEIC และ HEIF จาก iPhone แปลงเป็น JPG ด้วย `heic-convert` ก่อนบันทึก
 - รูปโปรไฟล์รับเฉพาะไฟล์รูปภาพ ขนาดไม่เกิน 10 MB
 - เปลี่ยนรูป ลบรูป หรือลบ Creator/User แล้ว ระบบจะลบไฟล์เก่าออกจากโฟลเดอร์ให้ด้วย
-- ถ้าบันทึกข้อมูลไม่สำเร็จ ไฟล์ที่เพิ่งอัปโหลดจะถูกลบทิ้ง ไม่ค้างอยู่ในโฟลเดอร์
+- ถ้าบันทึกข้อมูลไม่สำเร็จ ระบบจะลบไฟล์ที่เพิ่งอัปโหลดทิ้ง ไฟล์จึงไม่ค้างอยู่ในโฟลเดอร์
 
 ตัวอย่างการตั้งค่า Storage ของรูป Creator
 
@@ -462,13 +526,7 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
 | `/creators` (POST, PUT), `/me` (PUT) | `form-data` (ช่อง `picture` เลือกเป็น File) |
 | `/admins`, `/users` (POST, PUT) | `raw` แล้วเลือก `JSON` |
 
-**วิธีเอา token มาใช้ใน Postman**
-
-1. ส่ง `POST http://localhost:3030/login` ด้วย Body แบบ `x-www-form-urlencoded` ใส่ `username: admin` และ `password: admin1234`
-2. เปิดแท็บ Cookies ในส่วน Response แล้วคัดลอกค่าของ `token` ถ้าแท็บว่าง ให้ไปที่แท็บ Settings ของ Request ปิด "Automatically follow redirects" แล้วส่งใหม่ token จะอยู่ใน Header `Set-Cookie`
-3. ใน Request ที่ต้องการทดสอบ เพิ่ม Header Key `Authorization` และวาง token เป็น Value
-
-อีกวิธีหนึ่งคือ Login ผ่านหน้าเว็บ กด F12 เปิด Console แล้วพิมพ์ `getCookie('token')`
+Route ที่ต้อง Login ต้องแนบ token ใน Header ดูขั้นตอนได้ที่ [วิธีขอ Token สำหรับ Authorization](#วิธีขอ-token-สำหรับ-authorization)
 
 ## แก้ปัญหาที่พบบ่อย
 
