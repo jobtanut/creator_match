@@ -15,9 +15,8 @@ DROP TABLE IF EXISTS Edition;
 DROP TABLE IF EXISTS Creator;
 DROP TABLE IF EXISTS Login_log;
 DROP TABLE IF EXISTS User_account;
-DROP TABLE IF EXISTS Admin_account;   -- old table name, removed
+DROP TABLE IF EXISTS Admin_account;
 DROP TABLE IF EXISTS Role;
-DROP TABLE IF EXISTS Team_Member;   -- removed, the Team page is static HTML
 
 
 -- 1. Role  (lookup: 1 = Admin, 2 = User)
