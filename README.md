@@ -16,14 +16,17 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 
 ## สารบัญ
 
+0. [เริ่มต้นใช้งานแบบย่อ](#เริ่มต้นใช้งานแบบย่อ)
 1. [สิ่งที่ต้องติดตั้งก่อน](#สิ่งที่ต้องติดตั้งก่อน)
 2. [Clone โปรเจกต์](#clone-โปรเจกต์)
 3. [โครงสร้างโปรเจกต์](#โครงสร้างโปรเจกต์)
 4. [ติดตั้ง Database](#ติดตั้ง-database)
+    - [โครงสร้าง Database](#โครงสร้าง-database)
 5. [ตั้งค่า Environment Variables](#ตั้งค่า-environment-variables)
 6. [ติดตั้ง Packages](#ติดตั้ง-packages)
 7. [เปิดใช้งานโปรแกรม](#เปิดใช้งานโปรแกรม)
 8. [บัญชีสำหรับทดสอบ](#บัญชีสำหรับทดสอบ)
+    - [ลองใช้งานครั้งแรก](#ลองใช้งานครั้งแรก)
 9. [คู่มือการใช้งานหน้าเว็บ](#คู่มือการใช้งานหน้าเว็บ)
 10. [Public Web Service: NewsAPI](#public-web-service-newsapi)
 11. [API Reference](#api-reference)
@@ -35,13 +38,28 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 14. [การอัปโหลดรูปภาพ (Multer)](#การอัปโหลดรูปภาพ-multer)
 15. [การทดสอบด้วย Postman](#การทดสอบด้วย-postman)
 16. [แก้ปัญหาที่พบบ่อย](#แก้ปัญหาที่พบบ่อย)
+17. [ข้อจำกัดของระบบ](#ข้อจำกัดของระบบ)
+
+## เริ่มต้นใช้งานแบบย่อ
+
+สำหรับผู้ที่ต้องการเปิดเว็บให้ได้เร็วที่สุด ทำตามลำดับนี้ รายละเอียดของแต่ละขั้นอยู่ในหัวข้อถัดไป
+
+1. ติดตั้ง Node.js, MySQL และ Git ([สิ่งที่ต้องติดตั้งก่อน](#สิ่งที่ต้องติดตั้งก่อน))
+2. Clone โปรเจกต์ลงเครื่อง ([Clone โปรเจกต์](#clone-โปรเจกต์))
+3. Import ไฟล์ `sec1_gr11_database.sql` เข้า MySQL ([ติดตั้ง Database](#ติดตั้ง-database))
+4. สร้างไฟล์ `.env` ทั้งฝั่ง Frontend และ Web Service ([ตั้งค่า Environment Variables](#ตั้งค่า-environment-variables))
+5. รัน `npm install` ในโฟลเดอร์ `sec1_gr11_fe_src` และ `sec1_gr11_ws_src` ([ติดตั้ง Packages](#ติดตั้ง-packages))
+6. รัน `npm start` ทั้ง 2 ฝั่งใน Terminal คนละหน้าต่าง ([เปิดใช้งานโปรแกรม](#เปิดใช้งานโปรแกรม))
+7. เปิด `http://localhost:8081` แล้ว Login ด้วย `admin` / `admin1234` ([บัญชีสำหรับทดสอบ](#บัญชีสำหรับทดสอบ))
 
 ## สิ่งที่ต้องติดตั้งก่อน
 
 - **Node.js 18 ขึ้นไป** (ฝั่ง Web Service ใช้ `fetch` ที่มีมาในตัวตั้งแต่ Node 18) ตรวจเวอร์ชันได้ด้วย `node -v`
-- **MySQL 8** และ MySQL Workbench (หรือใช้ MySQL ผ่าน Terminal ก็ได้)
+- **MySQL 8.0.16 ขึ้นไป** และ MySQL Workbench (หรือใช้ MySQL ผ่าน Terminal ก็ได้) เวอร์ชันเก่ากว่านี้ไม่รองรับ `CHECK` constraint ที่ไฟล์ SQL ใช้
+- **Git** สำหรับ Clone โปรเจกต์ ถ้าไม่มี Git ให้กดปุ่ม Code > Download ZIP บนหน้า GitHub แล้วแตกไฟล์แทน
 - **Postman** สำหรับทดสอบ API
-- **NewsAPI key** สมัครฟรีได้ที่ [newsapi.org](https://newsapi.org/register) ใช้กับหน้า Trends
+- **NewsAPI key** สมัครฟรีได้ที่ [newsapi.org](https://newsapi.org/register) ใช้กับหน้า Trends หลังสมัคร key จะแสดงในหน้า Account
+- **การเชื่อมต่ออินเทอร์เน็ต** เฉพาะตอน `npm install` และตอนเปิดหน้า Trends ส่วนอื่นของเว็บทำงานได้แบบ offline
 
 ## Clone โปรเจกต์
 
@@ -49,6 +67,8 @@ CreatorMatch คือเว็บไซต์สำหรับแบรนด�
 git clone https://github.com/jobtanut/creator_match.git
 cd creator_match
 ```
+
+โฟลเดอร์ `creator_match` คือ **โฟลเดอร์หลักของโปรเจกต์** คำสั่งทุกคำสั่งในคู่มือนี้เริ่มจากโฟลเดอร์นี้ ถ้าไม่แน่ใจว่าตอนนี้อยู่ที่ไหน ให้กลับมาที่โฟลเดอร์นี้ก่อน
 
 ## โครงสร้างโปรเจกต์
 
@@ -66,7 +86,7 @@ Browser ──(หน้าเว็บ)──> Frontend :8081
 ```
 
 ```
-sec1_gr11/
+creator_match/
 ├── sec1_gr11_fe_src/              Frontend server
 │   ├── app.js                     จุดเริ่มต้นของ Frontend server
 │   ├── router/                    Router ของแต่ละกลุ่มหน้า
@@ -110,11 +130,33 @@ sec1_gr11/
 
 **วิธีที่ 2: Terminal**
 
+รันคำสั่งนี้ที่โฟลเดอร์หลัก `creator_match` (โฟลเดอร์เดียวกับไฟล์ SQL) ระบบจะถามรหัสผ่านของ MySQL
+
 ```bash
 mysql -u root -p < sec1_gr11_database.sql
 ```
 
+ถ้าขึ้น `command not found` แปลว่าเครื่องหาคำสั่ง `mysql` ไม่เจอ ให้ใช้วิธีที่ 1 ผ่าน Workbench แทน
+
 ข้อมูลตัวอย่างที่ได้: Admin 3 บัญชี, User 2 บัญชี และ Creator 14 คน พร้อมแพลตฟอร์มของแต่ละคน
+
+ตรวจว่า import สำเร็จด้วยคำสั่ง SQL นี้ ควรได้ผลลัพธ์เป็น 14
+
+```sql
+SELECT COUNT(*) FROM creatormatch.Creator;
+```
+
+### โครงสร้าง Database
+
+| Table | เก็บอะไร |
+| :--- | :--- |
+| `Role` | บทบาทของบัญชี มี 2 ค่า คือ 1 = Admin และ 2 = User |
+| `User_account` | บัญชีทั้ง Admin และ User แยกกันด้วย `Role_ID` รวมถึงรูปโปรไฟล์และ Bio |
+| `Login_log` | ประวัติการ Login แต่ละครั้ง (ลบอัตโนมัติเมื่อลบบัญชี) |
+| `Creator` | ข้อมูล Creator ได้แก่ ชื่อ หมวดหมู่ จำนวน Followers รูป คำอธิบาย และสถานะ Active/Inactive |
+| `Creator_Platform` | แพลตฟอร์มของ Creator แต่ละคน หนึ่งคนมีได้หลายแพลตฟอร์ม |
+| `Edition` | ประวัติว่า Admin คนไหนเพิ่มหรือแก้ Creator คนไหน เมื่อไร |
+| `Management` | ประวัติว่า Admin คนไหนเพิ่มหรือแก้บัญชี Admin คนอื่น |
 
 ## ตั้งค่า Environment Variables
 
@@ -126,7 +168,7 @@ mysql -u root -p < sec1_gr11_database.sql
 PORT=8081
 ```
 
-**Web Service:** คัดลอก `sec1_gr11_ws_src/.env.example` เป็น `sec1_gr11_ws_src/.env` แล้วกรอกค่า
+**Web Service:** สร้างไฟล์ `sec1_gr11_ws_src/.env` (หรือคัดลอกจาก `sec1_gr11_ws_src/.env.example` แล้วเปลี่ยนชื่อ) แล้วกรอกค่าตามนี้
 
 ```
 PORT=3030
@@ -137,7 +179,7 @@ DBPASSWORD=รหัสผ่าน_MySQL_ของเครื่องที�
 DBDATABASE=creatormatch
 
 JWT_SECRET=ข้อความลับอะไรก็ได้_ยิ่งยาวยิ่งดี
-NEWS_API_KEY=6b13de6ea5e142af82559bafa4db0a22
+NEWS_API_KEY=key_จาก_newsapi.org
 ```
 
 | ตัวแปร | ใช้ทำอะไร |
@@ -148,13 +190,18 @@ NEWS_API_KEY=6b13de6ea5e142af82559bafa4db0a22
 | `JWT_SECRET` | Secret สำหรับ sign และตรวจ JWT token |
 | `NEWS_API_KEY` | API key ของ NewsAPI ถ้าไม่ใส่ หน้า Trends จะแสดงข้อความว่า key หายหรือผิด |
 
+ชื่อไฟล์ต้องเป็น `.env` พอดี (มีจุดนำหน้า ไม่มีนามสกุลอื่นต่อท้าย) บน Windows ให้ระวัง Notepad เติม `.txt` ให้เอง
+
 ## ติดตั้ง Packages
+
+รันจากโฟลเดอร์หลัก `creator_match` ทีละฝั่ง
 
 **Frontend**
 
 ```bash
 cd sec1_gr11_fe_src
 npm install
+cd ..
 ```
 
 | Package | หน้าที่ |
@@ -168,7 +215,10 @@ npm install
 ```bash
 cd sec1_gr11_ws_src
 npm install
+cd ..
 ```
+
+`npm install` อ่านรายชื่อ Package จาก `package.json` แล้วติดตั้งให้ครบ ไม่ต้องพิมพ์ชื่อ Package เอง
 
 | Package | หน้าที่ |
 | :--- | :--- |
@@ -184,7 +234,7 @@ npm install
 
 ## เปิดใช้งานโปรแกรม
 
-เปิด Terminal 2 หน้าต่าง แล้วรันทีละฝั่ง
+เปิด Terminal 2 หน้าต่าง ทั้ง 2 หน้าต่างเริ่มที่โฟลเดอร์หลัก `creator_match` แล้วรันฝั่งละหน้าต่าง ต้องเปิดไว้ทั้งคู่ตลอดเวลาที่ใช้งานเว็บ
 
 **Terminal 1: Web Service**
 
@@ -206,6 +256,8 @@ npm start
 
 ต้องเปิดผ่าน `localhost` เท่านั้น (ไม่ใช่ `127.0.0.1`) เพราะ Cookie ที่เก็บ token ผูกกับชื่อ `localhost`
 
+ปิด Server ได้ด้วยการกด `Ctrl + C` ใน Terminal ของแต่ละฝั่ง ถ้าแก้ไฟล์ `.env` ต้องปิดแล้วเปิด Server ฝั่งนั้นใหม่ เพราะ `nodemon` ไม่ได้ดูการเปลี่ยนแปลงของ `.env`
+
 ## บัญชีสำหรับทดสอบ
 
 | Username | Password | Role | หลัง Login ไปที่ |
@@ -217,6 +269,19 @@ npm start
 | `user2` | `user2pass` | User | หน้าแรก |
 
 บัญชีที่สมัครใหม่ผ่านหน้า Sign Up จะเป็น User เสมอ บัญชี Admin สร้างได้จากหน้า Admin Manage เท่านั้น
+
+### ลองใช้งานครั้งแรก
+
+ทำตามขั้นตอนนี้เพื่อลองทุกส่วนหลักของเว็บในเวลาประมาณ 5 นาที
+
+1. เปิด `http://localhost:8081` หน้าแรกจะแสดง Featured Creators กด View Details ที่ Creator คนใดก็ได้
+2. กด Search ที่แถบเมนู เลือก Category เป็น Food แล้วเลื่อน Slider ของ Followers ดูผลลัพธ์ที่เปลี่ยนไป
+3. กด Trends เพื่อดูข่าวเด่น (ต้องใส่ `NEWS_API_KEY` แล้ว)
+4. กด Login แล้วเข้าด้วย `admin` / `admin1234` ระบบจะพาไปหน้า Admin Menu
+5. เข้า Creator Manage กด Add Creator กรอกชื่อ เลือก Category ใส่ Followers และลากรูปมาวาง แล้วกดบันทึก
+6. กลับไปหน้า Search ค้นหาชื่อ Creator ที่เพิ่งเพิ่ม จะเห็นในผลลัพธ์ (ถ้าตั้งสถานะเป็น Active)
+7. คลิกรูปโปรไฟล์มุมขวาบน เลือก My Profile แล้วลองอัปโหลดรูปโปรไฟล์
+8. คลิกรูปโปรไฟล์อีกครั้งแล้วเลือก Logout
 
 ## คู่มือการใช้งานหน้าเว็บ
 
@@ -536,9 +601,22 @@ Route ที่ต้อง Login ต้องแนบ token ใน Header ด�
 | `DB connection failed: Access denied` | `DBUSER` หรือ `DBPASSWORD` ใน `.env` ไม่ตรงกับ MySQL ของเครื่อง |
 | `Unknown database 'creatormatch'` | ยังไม่ได้ import `sec1_gr11_database.sql` |
 | `fetch is not defined` | Node.js เก่ากว่าเวอร์ชัน 18 ให้อัปเดต Node |
+| `EADDRINUSE: address already in use :::3030` (หรือ 8081) | มี Server เปิดค้างอยู่แล้ว ให้ปิด Terminal เก่า หรือกด `Ctrl + C` ใน Terminal ที่รันอยู่ก่อน แล้วเปิดใหม่ |
+| `Missing script: "start"` | รัน `npm start` ผิดโฟลเดอร์ ต้องอยู่ใน `sec1_gr11_fe_src` หรือ `sec1_gr11_ws_src` |
+| `Check constraint ... is violated` หรือ Syntax error ตอน import SQL | MySQL เก่ากว่า 8.0.16 ให้อัปเดต MySQL |
 | หน้าเว็บขึ้น "Could not load ..." | Web Service ยังไม่ได้เปิด หรือไม่ได้รันที่ port 3030 |
 | Login แล้วแถบเมนูยังขึ้น Login | เปิดเว็บผ่าน `127.0.0.1` ให้เปลี่ยนเป็น `localhost:8081` |
 | หน้า Trends ขึ้น "NewsAPI key is missing or wrong" | ยังไม่ได้ใส่ `NEWS_API_KEY` ใน `.env` หรือใส่ผิด แก้แล้วต้อง Restart Web Service |
 | หน้า Trends ขึ้น "daily limit reached" | ใช้โควตา 100 ครั้งต่อวันของ NewsAPI หมดแล้ว ต้องรอวันถัดไป |
 | รูป Creator ไม่ขึ้น | โฟลเดอร์ `public/creators/` ไม่ครบ ไฟล์รูปต้องมาพร้อมกับโปรเจกต์ |
 | แก้ CSS หรือ JS แล้วหน้าเว็บไม่เปลี่ยน | Browser ใช้ไฟล์เก่าจาก cache ให้กด Cmd+Shift+R (Mac) หรือ Ctrl+Shift+R (Windows) |
+| เปิดหน้า Admin แล้วเด้งกลับไปหน้า Login | ยังไม่ได้ Login หรือ Login ด้วยบัญชี User ให้ Login ด้วยบัญชี Admin |
+| Postman ได้ 401 Unauthorized | ไม่ได้แนบ token หรือ token ผิด ดู [วิธีขอ Token สำหรับ Authorization](#วิธีขอ-token-สำหรับ-authorization) |
+| Postman ได้ 403 Admins only | ใช้ token ของบัญชี User กับ Route ของ Admin ให้ขอ token ใหม่ด้วยบัญชี Admin |
+
+## ข้อจำกัดของระบบ
+
+- โปรเจกต์นี้ทำขึ้นเพื่อการเรียน รหัสผ่านเก็บใน Database แบบข้อความธรรมดา ไม่ได้เข้ารหัส จึงไม่ควรใช้รหัสผ่านจริงกับระบบนี้
+- ระบบออกแบบให้รันบนเครื่องตัวเอง (`localhost`) เท่านั้น ที่อยู่ของ Web Service (`http://localhost:3030`) เขียนไว้ในไฟล์ JavaScript ของหน้าเว็บ ถ้าจะย้ายไป Server จริงต้องแก้ทุกจุด
+- Token ไม่มีวันหมดอายุ และ Logout เป็นการลบ Cookie ในเครื่องเท่านั้น
+- NewsAPI แพ็กเกจฟรีเรียกได้ 100 ครั้งต่อวัน และข่าวช้ากว่าเวลาจริงประมาณ 24 ชั่วโมง
