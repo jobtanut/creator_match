@@ -162,6 +162,7 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
+// ------------------ CRUD ------------------
 
 // Login (admins and regular users)
 // Test 1 (admin, correct password):
@@ -221,13 +222,13 @@ router.post('/login', loginAuth, (req, res) => {
 //   method: POST
 //   URL: http://localhost:3030/signup
 //   body: x-www-form-urlencoded
-//     first_name: Pakorn
-//     last_name: Srisawat
-//     email: pakorn@example.com
-//     username: pakorn
-//     password: pakorn123
-//     confirm_password: pakorn123
-//   expected: 302 redirect to http://localhost:8081/auth/login
+//     first_name: aomsinzaza
+//     last_name: lnwzaza008
+//     email: aomsinzaza@example.com
+//     username: aomsinzaza
+//     password: lnwzaza008
+//     confirm_password: lnwzaza008
+//   expected: 200 redirect to http://localhost:8081/auth/login
 
 // Test 2 (username already taken):
 //   method: POST
@@ -329,6 +330,7 @@ const savePlatforms = async (creatorId, platforms) => {
 // Test 1 (no criteria = every creator):
 //   method: GET
 //   URL: http://localhost:3030/creators
+
 //   expected: 200, { "error": false, "count": 14, "data": [ ... ] }
 // Test 2 (search with criteria):
 //   method: GET
@@ -385,6 +387,7 @@ router.get('/creators', async (req, res) => {
 // Test 1:
 //   method: GET
 //   URL: http://localhost:3030/creators/featured
+
 //   expected: 200, "data" has 6 creators, all with Status Active
 // Test 2 (send again):
 //   method: GET
@@ -417,11 +420,6 @@ router.get('/creators/featured', async (req, res) => {
 //   method: GET
 //   URL: http://localhost:3030/creators/follower-range
 //   expected: 200, { "error": false, "min": 0, "max": 1200000 }
-// Test 2 (after deactivating the biggest creator):
-//   first edit FahDaily (C000000103) to Status Inactive with PUT /creators/C000000103, then
-//   method: GET
-//   URL: http://localhost:3030/creators/follower-range
-//   expected: 200, "max" drops to 880000
 
 // Follower range of active creators, for the search page slider (must stay above /creators/:id)
 router.get('/creators/follower-range', async (req, res) => {
@@ -442,10 +440,12 @@ router.get('/creators/follower-range', async (req, res) => {
 //   method: GET
 //   URL: http://localhost:3030/creators/search?name=eats&category=Food&platform=TikTok
 //   expected: 200, one result: PloyEats
+
 // Test 2 (follower range + two platforms):
 //   method: GET
 //   URL: http://localhost:3030/creators/search?platform=Facebook&platform=YouTube&min_followers=100000&max_followers=900000
 //   expected: 200, three results: BankFits, JayDessert, TechTom
+
 // Test 3 (bad range):
 //   method: GET
 //   URL: http://localhost:3030/creators/search?min_followers=500000&max_followers=100000
@@ -516,6 +516,7 @@ router.get('/creators/search', async (req, res) => {
 //   method: GET
 //   URL: http://localhost:3030/creators/C000000101
 //   expected: 200, PloyEats with platforms "Instagram, TikTok"
+
 // Test 2 (does not exist):
 //   method: GET
 //   URL: http://localhost:3030/creators/C999999999
@@ -548,7 +549,7 @@ router.get('/creators/:id', async (req, res) => {
 // Test 1 (with picture):
 //   method: POST
 //   URL: http://localhost:3030/creators
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: form-data
 //     creator_name: CafeHopperTH
 //     category: Lifestyle
@@ -560,6 +561,7 @@ router.get('/creators/:id', async (req, res) => {
 //     Status: Active
 //     picture: (type File) choose a .jpg / .png / .heic
 //   expected: 200, { "error": false, "message": "Creator added", "creatorID": "C..." }
+
 // Test 2 (no token):
 //   method: POST
 //   URL: http://localhost:3030/creators
@@ -606,7 +608,7 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
 // Test 1 (change followers and status):
 //   method: PUT
 //   URL: http://localhost:3030/creators/C000000107
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: form-data
 //     creator_name: TechTom
 //     category: Technology
@@ -617,10 +619,11 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
 //     Description: Gadget reviews and phone comparisons in Thai
 //     Status: Inactive
 //   expected: 200, "Creator updated"
+
 // Test 2 (invalid followers):
 //   method: PUT
 //   URL: http://localhost:3030/creators/C000000107
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: form-data
 //     creator_name: TechTom
 //     category: Technology
@@ -688,12 +691,13 @@ router.put('/creators/:id', requireJWTAuth, requireAdmin, upload.single('picture
 // Test 1:
 //   method: DELETE
 //   URL: http://localhost:3030/creators/C000000104
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, "Creator deleted"
+
 // Test 2 (already deleted / does not exist):
 //   method: DELETE
 //   URL: http://localhost:3030/creators/C000000104
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 404, "Creator not found"
 
 // Delete Creators
@@ -780,13 +784,14 @@ const adminDbError = (err) => {
 // Testing Search / list admin accounts (admin only). No criteria = every admin.
 // Test 1 (all admins):
 //   method: GET
-//   URL: http://localhost:3030/admins
-//   header: Authorization: <admin token>
+//   URL: http://localhost:3030/admin/admins
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, "count": 3, no password field in any result
+
 // Test 2 (search with criteria):
 //   method: GET
 //   URL: http://localhost:3030/admins?name=tanut&email=creatormatch&position=Developer
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, one result: admin (Tanut Noumanong)
 
 // Search admin account
@@ -827,12 +832,13 @@ router.get('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1:
 //   method: GET
 //   URL: http://localhost:3030/admins/U000000002
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, benya (Benya Shinno)
+
 // Test 2 (a regular user's ID is not an admin):
 //   method: GET
 //   URL: http://localhost:3030/admins/U000000101
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 404, "Admin not found"
 
 // Find admin account
@@ -854,7 +860,7 @@ router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1 (linked to a team member):
 //   method: POST
 //   URL: http://localhost:3030/admins
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "monthisa",
@@ -866,10 +872,11 @@ router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "TeamMemberID": "T000000004"
 //   }
 //   expected: 200, "Admin added"
+
 // Test 2 (password too short):
 //   method: POST
 //   URL: http://localhost:3030/admins
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "shortpw",
@@ -879,7 +886,7 @@ router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "last_name": "Password"
 //   }
 //   expected: 400, "Password must be at least 8 characters"
- 
+
 // add admin account
 router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
     const { data, error } = readAdminForm(req.body, true);
@@ -914,7 +921,7 @@ router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1 (change position, keep password):
 //   method: PUT
 //   URL: http://localhost:3030/admins/U000000003
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "naphat",
@@ -924,10 +931,11 @@ router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "Position": "Project Manager"
 //   }
 //   expected: 200, "Admin updated"
+
 // Test 2 (username already used by another admin):
 //   method: PUT
 //   URL: http://localhost:3030/admins/U000000003
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "benya",
@@ -936,7 +944,7 @@ router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "last_name": "Member"
 //   }
 //   expected: 409, "That username is already taken"
- 
+
 // Edit Admin
 router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const adminId = req.params.id;
@@ -975,14 +983,15 @@ router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1:
 //   method: DELETE
 //   URL: http://localhost:3030/admins/U000000003
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, "Admin deleted"
+
 // Test 2 (deleting your own account, logged in as admin = U000000001):
 //   method: DELETE
 //   URL: http://localhost:3030/admins/U000000001
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 400, "You cannot delete your own account"
- 
+
 // Delete Admin
 router.delete('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const adminId = req.params.id;
@@ -1054,11 +1063,13 @@ const getHeadlines = async (category, country) => {
 //   URL: http://localhost:3030/trends?category=sports
 //   expected: 200, { "error": false, "category": "sports", "country": "th" (or "us"), "data": [ ... ] },
 //             every item has title, url, image, source and publishedAt
+
 // Test 2 (category that does not exist):
 //   method: GET
 //   URL: http://localhost:3030/trends?category=food
 //   expected: 400, "Category must be one of: general, entertainment, sports, technology, business"
 
+//Get trendsing news
 router.get('/trends', async (req, res) => {
     const category = (req.query.category || 'general').trim();
     if (!NEWS_CATEGORIES.includes(category)) {
@@ -1136,13 +1147,15 @@ const ME_FIELDS = `UserID, username, email, first_name, last_name, Position, Use
 // Test 1 (logged in):
 //   method: GET
 //   URL: http://localhost:3030/me
-//   header: Authorization: <user1 token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, user1's details (Somchai), no password field
+
 // Test 2 (no token):
 //   method: GET
 //   URL: http://localhost:3030/me
 //   expected: 401 Unauthorized
 
+//Get view my profile
 router.get('/me', requireJWTAuth, async (req, res) => {
     try {
         const [rows] = await db.query(`SELECT ${ME_FIELDS} FROM User_account WHERE UserID = ?`, [req.user.UserID]);
@@ -1157,7 +1170,7 @@ router.get('/me', requireJWTAuth, async (req, res) => {
 // Test 1 (change bio and picture):
 //   method: PUT
 //   URL: http://localhost:3030/me
-//   header: Authorization: <user1 token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: form-data
 //     first_name: Somchai
 //     last_name: Jaidee
@@ -1165,10 +1178,11 @@ router.get('/me', requireJWTAuth, async (req, res) => {
 //     Bio: Food lover looking for Thai creators
 //     picture: (type File) choose a .jpg / .png / .heic
 //   expected: 200, "Profile updated", "User_picture_link": "/users/U....jpg"
+
 // Test 2 (wrong current password):
 //   method: PUT
 //   URL: http://localhost:3030/me
-//   header: Authorization: <user1 token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: form-data
 //     first_name: Somchai
 //     last_name: Jaidee
@@ -1178,6 +1192,7 @@ router.get('/me', requireJWTAuth, async (req, res) => {
 //     confirm_password: newpass123
 //   expected: 400, "Current password is incorrect"
 
+//Edit my profile
 router.put('/me', requireJWTAuth, userUpload.single('picture'), fixHeic, async (req, res) => {
     const newFile = req.file ? `/users/${req.file.filename}` : null;
     // if anything below fails, don't leave the uploaded file lying around
@@ -1267,14 +1282,16 @@ const readUserForm = (body, passwordRequired) => {
 // Test 1 (all users):
 //   method: GET
 //   URL: http://localhost:3030/users
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, "count": 2, no password field in any result
+
 // Test 2 (search with criteria):
 //   method: GET
 //   URL: http://localhost:3030/users?name=somchai&email=example
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, one result: user1 (Somchai Jaidee)
 
+//Get search / list user accounts
 router.get('/users', requireJWTAuth, requireAdmin, async (req, res) => {
     try {
         const name = (req.query.name || '').trim();
@@ -1307,14 +1324,16 @@ router.get('/users', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1:
 //   method: GET
 //   URL: http://localhost:3030/users/U000000101
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, user1 (Somchai Jaidee)
+
 // Test 2 (an admin's ID is not a regular user):
 //   method: GET
 //   URL: http://localhost:3030/users/U000000001
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 404, "User not found"
 
+//Get one user account
 router.get('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -1333,7 +1352,7 @@ router.get('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1:
 //   method: POST
 //   URL: http://localhost:3030/users
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "malee",
@@ -1344,10 +1363,11 @@ router.get('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "Bio": "Looking for beauty creators"
 //   }
 //   expected: 200, "User added"
+
 // Test 2 (email already used):
 //   method: POST
 //   URL: http://localhost:3030/users
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "someonenew",
@@ -1358,6 +1378,7 @@ router.get('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //   }
 //   expected: 409, "That email is already used"
 
+//Post add user account
 router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
     const { data, error } = readUserForm(req.body, true);
     if (error) return res.status(400).json({ error: true, message: error });
@@ -1386,7 +1407,7 @@ router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1 (change bio and remove the profile picture):
 //   method: PUT
 //   URL: http://localhost:3030/users/U000000102
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "user2",
@@ -1397,10 +1418,11 @@ router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "remove_picture": true
 //   }
 //   expected: 200, "User updated"
+
 // Test 2 (missing first name):
 //   method: PUT
 //   URL: http://localhost:3030/users/U000000102
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   body: raw JSON
 //   {
 //     "username": "user2",
@@ -1409,6 +1431,7 @@ router.post('/users', requireJWTAuth, requireAdmin, async (req, res) => {
 //   }
 //   expected: 400, "Username, email, first name and last name are required"
 
+//Put edit user
 router.put('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const userId = req.params.id;
     const { data, error } = readUserForm(req.body, false);
@@ -1447,14 +1470,15 @@ router.put('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 // Test 1:
 //   method: DELETE
 //   URL: http://localhost:3030/users/U000000102
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 200, "User deleted"
 // Test 2 (an admin can't be deleted from here):
 //   method: DELETE
 //   URL: http://localhost:3030/users/U000000002
-//   header: Authorization: <admin token>
+//   header: Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOjEsImlhdCI6MTc5NTQzMTQ2MX0.19lD6GJ0K-nqvLZUMtyX8tcocKO8Iyd3P8kuQeKFbgk
 //   expected: 404, "User not found"
 
+//Delete user account
 router.delete('/users/:id', requireJWTAuth, requireAdmin, async (req, res) => {
     const userId = req.params.id;
 
