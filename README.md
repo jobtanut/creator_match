@@ -179,7 +179,7 @@ DBPASSWORD=รหัสผ่าน_MySQL_ของเครื่องที�
 DBDATABASE=creatormatch
 
 JWT_SECRET=ข้อความลับอะไรก็ได้_ยิ่งยาวยิ่งดี
-NEWS_API_KEY=key_จาก_newsapi.org
+NEWS_API_KEY=6b13de6ea5e142af82559bafa4db0a22
 ```
 
 | ตัวแปร | ใช้ทำอะไร |
