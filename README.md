@@ -579,8 +579,7 @@ router.post('/creators', requireJWTAuth, requireAdmin, upload.single('picture'),
 
 ## การทดสอบด้วย Postman
 
-ทุก Route ใน `sec1_gr11_ws_src/src/app.js` มี Test case เขียนไว้เป็น Comment ด้านบน Route 
-ซึ่งระบุ Method, URL, Header, Body และผลลัพธ์ที่ควรได้
+ทุก Route ใน `sec1_gr11_ws_src/src/app.js` มี Test case เขียนไว้เป็น Comment ด้านบน Route มี test case อย่างน้อย 2 case ซึ่งมีระบุ Method, URL, Header, Body และผลลัพธ์ที่ควรได้
 
 ผลลัพธ์ใน Test case อ้างอิงข้อมูลจากไฟล์ SQL ที่เพิ่ง import ใหม่ ถ้าทดสอบเพิ่ม แก้ หรือลบข้อมูลไปแล้ว ให้ import `sec1_gr11_database.sql` ใหม่ก่อนทดสอบรอบถัดไป
 
