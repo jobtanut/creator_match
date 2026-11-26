@@ -416,10 +416,18 @@ router.get('/creators/featured', async (req, res) => {
 
 
 // Testing Lowest and highest follower counts of Active creators (search page slider)
-// Test 1:
+// Test 1 (all Active creators):
 //   method: GET
 //   URL: http://localhost:3030/creators/follower-range
 //   expected: 200, { "error": false, "min": 0, "max": 1200000 }
+
+// Test 2 (Inactive creators are left out):
+//   setup: set FahDaily (C000000103, 1,200,000 followers) to Inactive first,
+//          in Creator Manage or with PUT http://localhost:3030/creators/C000000103 (Status: Inactive)
+//   method: GET
+//   URL: http://localhost:3030/creators/follower-range
+//   expected: 200, { "error": false, "min": 0, "max": 880000 }, max is now JayDessert,
+//             because FahDaily no longer counts. Set FahDaily back to Active afterwards.
 
 // Follower range of active creators, for the search page slider (must stay above /creators/:id)
 router.get('/creators/follower-range', async (req, res) => {
