@@ -740,7 +740,7 @@ router.delete('/creators/:id', requireJWTAuth, requireAdmin, async (req, res) =>
 // ------------------ ADMIN ACCOUNTS (admin only) ------------------
  
 // Admin accounts are rows in User_account with Role_ID = 1. Passwords are never sent back.
-const ADMIN_FIELDS = `UserID, username, email, first_name, last_name, Position, TeamMemberID, created_at`;
+const ADMIN_FIELDS = `UserID, username, email, first_name, last_name, Position, created_at`;
 
 // Records "superAdmin changed admin" in the Management table (one row per pair, time updated)
 const logManagement = (superAdminId, adminId) => db.query(
@@ -758,7 +758,6 @@ const readAdminForm = (body, passwordRequired) => {
         first_name: (body.first_name || '').trim(),
         last_name: (body.last_name || '').trim(),
         Position: (body.Position || '').trim() || null,
-        TeamMemberID: (body.TeamMemberID || '').trim() || null,
     };
 
     if (!data.username || !data.email || !data.first_name || !data.last_name) {
@@ -869,7 +868,6 @@ router.get('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
 //     "first_name": "Monthisa",
 //     "last_name": "Member",
 //     "Position": "Team Member",
-//     "TeamMemberID": "T000000004"
 //   }
 //   expected: 200, "Admin added"
 
@@ -898,10 +896,10 @@ router.post('/admins', requireJWTAuth, requireAdmin, async (req, res) => {
         await db.beginTransaction();
         await db.query(
             `INSERT INTO User_account
-                (UserID, username, email, password, first_name, last_name, Position, Role_ID, TeamMemberID)
+                (UserID, username, email, password, first_name, last_name, Position, Role_ID)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [userId, data.username, data.email, data.password, data.first_name, data.last_name,
-             data.Position, ROLE_ADMIN, data.TeamMemberID]
+             data.Position, ROLE_ADMIN]
         );
         await logManagement(req.user.UserID, userId);
         await db.commit();
@@ -958,9 +956,9 @@ router.put('/admins/:id', requireJWTAuth, requireAdmin, async (req, res) => {
         await db.beginTransaction();
         await db.query(
             `UPDATE User_account
-             SET username = ?, email = ?, first_name = ?, last_name = ?, Position = ?, TeamMemberID = ?
+             SET username = ?, email = ?, first_name = ?, last_name = ?, Position = ?
              WHERE UserID = ?`,
-            [data.username, data.email, data.first_name, data.last_name, data.Position, data.TeamMemberID, adminId]
+            [data.username, data.email, data.first_name, data.last_name, data.Position, adminId]
         );
         if (data.password) {
             await db.query('UPDATE User_account SET password = ? WHERE UserID = ?', [data.password, adminId]);
